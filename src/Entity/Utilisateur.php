@@ -121,12 +121,18 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
      * @see UserInterface
      */
     public function getRoles(): array
-    {
-        $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
+{
+    $roles = $this->roles;
 
-        return array_unique($roles);
+    // 🔑 On ajoute notre rôle personnalisé (ROLE_ADMIN ou ROLE_USER)
+    if (!empty($this->role)) {
+        $roles[] = $this->role;
+    }
+
+    // Sécurité : tout utilisateur a au moins ROLE_USER
+    $roles[] = 'ROLE_USER';
+
+    return array_unique($roles);
     }
 
     /**
