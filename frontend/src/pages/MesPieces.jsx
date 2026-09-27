@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import pieceService from '../services/pieceService';
+import Modal from '../components/Modal';
 
 function MesPieces() {
   const { user } = useAuth();
@@ -10,6 +11,7 @@ function MesPieces() {
   const navigate = useNavigate();
   const [pieces, setPieces] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pieceToDelete, setPieceToDelete] = useState(null); // Stocke la pièce à supprimer
 
   useEffect(() => {
     if (!user) {
@@ -31,16 +33,29 @@ function MesPieces() {
     fetchMesPieces();
   }, [user, navigate, addToast]);
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Es-tu sûr de vouloir supprimer cette pièce ?')) return;
+  // Demande de confirmation : on stocke la pièce dans un state
+  const requestDelete = (piece) => {
+    setPieceToDelete(piece);
+  };
+
+  // Annulation
+  const cancelDelete = () => {
+    setPieceToDelete(null);
+  };
+
+  // Confirmation de suppression
+  const confirmDelete = async () => {
+    if (!pieceToDelete) return;
 
     try {
-      await pieceService.deletePieceSecure(id);
-      setPieces((prev) => prev.filter((p) => p.id !== id));
+      await pieceService.deletePieceSecure(pieceToDelete.id);
+      setPieces((prev) => prev.filter((p) => p.id !== pieceToDelete.id));
       addToast('Pièce supprimée avec succès.', 'success');
     } catch (err) {
       console.error(err);
       addToast('Erreur lors de la suppression.', 'error');
+    } finally {
+      setPieceToDelete(null);
     }
   };
 
@@ -95,7 +110,7 @@ function MesPieces() {
                     Voir
                   </Link>
                   <button
-                    onClick={() => handleDelete(piece.id)}
+                    onClick={() => requestDelete(piece)}
                     className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
                   >
                     Supprimer
@@ -106,6 +121,18 @@ function MesPieces() {
           </div>
         )}
       </div>
+
+      {/* Modale de confirmation */}
+      <Modal
+        isOpen={!!pieceToDelete}
+        title="Supprimer cette annonce ?"
+        message={`Es-tu sûr de vouloir supprimer "${pieceToDelete?.titre}" ? Cette action est irréversible.`}
+        confirmText="Oui, supprimer"
+        cancelText="Annuler"
+        type="danger"
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+      />
     </div>
   );
 }
