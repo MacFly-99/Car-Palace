@@ -12,6 +12,7 @@ import AdminRoute from './components/AdminRoute';
 // ==============================================
 // IMPORTS PAGES - ESPACE PUBLIC
 // ==============================================
+import Catalogue from './pages/pieces/Catalogue';
 import PieceDetail from './pages/pieces/PieceDetail';
 
 // ==============================================
@@ -44,6 +45,7 @@ function App() {
         {/* ============================================== */}
         {/* ROUTES PUBLIQUES (accessibles sans connexion) */}
         {/* ============================================== */}
+        <Route path="/" element={<Catalogue />} />
         <Route path="/pieces/:id" element={<PieceDetail />} />
 
         {/* ============================================== */}
