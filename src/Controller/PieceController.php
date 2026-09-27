@@ -103,6 +103,98 @@ class PieceController extends AbstractController
     }
 
     /**
+     * Récupérer les données brutes d'une pièce pour le formulaire d'édition.
+     */
+    #[Route('/api/pieces/{id}/edit-data', name: 'api_piece_edit_data', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function editData(int $id, EntityManagerInterface $em): JsonResponse
+    {
+        $piece = $em->getRepository(Piece::class)->find($id);
+
+        if (!$piece) {
+            return new JsonResponse(['error' => 'Pièce introuvable.'], Response::HTTP_NOT_FOUND);
+        }
+
+        /** @var Utilisateur $user */
+        $user = $this->getUser();
+
+        if ($piece->getVendeur() !== $user) {
+            return new JsonResponse(['error' => 'Accès refusé.'], Response::HTTP_FORBIDDEN);
+        }
+
+        return new JsonResponse([
+            'id' => $piece->getId(),
+            'titre' => $piece->getTitre(),
+            'description' => $piece->getDescription(),
+            'prix' => $piece->getPrix(),
+            'etat' => $piece->getEtat(),
+            'annee' => $piece->getAnnee(),
+            'statut' => $piece->getStatut(),
+            'marque' => $piece->getMarque() ? '/api/marques/' . $piece->getMarque()->getId() : '',
+            'modele' => $piece->getModele() ? '/api/modeles/' . $piece->getModele()->getId() : '',
+            'categorie' => $piece->getCategorie() ? '/api/categories/' . $piece->getCategorie()->getId() : '',
+        ]);
+    }
+
+    /**
+     * Modifier une pièce (seulement si on en est le propriétaire).
+     */
+    #[Route('/api/pieces/{id}/update', name: 'api_piece_update', methods: ['PUT'])]
+    #[IsGranted('ROLE_USER')]
+    public function update(int $id, Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        $piece = $em->getRepository(Piece::class)->find($id);
+
+        if (!$piece) {
+            return new JsonResponse(['error' => 'Pièce introuvable.'], Response::HTTP_NOT_FOUND);
+        }
+
+        /** @var Utilisateur $user */
+        $user = $this->getUser();
+
+        // 🔒 SÉCURITÉ : On vérifie que l'utilisateur est bien le propriétaire
+        if ($piece->getVendeur() !== $user) {
+            return new JsonResponse(['error' => 'Tu n\'es pas le propriétaire de cette pièce.'], Response::HTTP_FORBIDDEN);
+        }
+
+        $data = json_decode($request->getContent(), true);
+
+        // Mise à jour des champs si présents dans la requête
+        if (isset($data['titre'])) $piece->setTitre($data['titre']);
+        if (isset($data['description'])) $piece->setDescription($data['description']);
+        if (isset($data['prix'])) $piece->setPrix((float) $data['prix']);
+        if (isset($data['etat'])) $piece->setEtat($data['etat']);
+        if (isset($data['annee'])) $piece->setAnnee((int) $data['annee']);
+        if (isset($data['statut'])) $piece->setStatut($data['statut']);
+
+        // Marque
+        if (!empty($data['marque'])) {
+            $marque = $em->getRepository(\App\Entity\Marque::class)->find($this->extractIdFromIri($data['marque']));
+            if ($marque) $piece->setMarque($marque);
+        }
+
+        // Catégorie
+        if (!empty($data['categorie'])) {
+            $categorie = $em->getRepository(\App\Entity\Categorie::class)->find($this->extractIdFromIri($data['categorie']));
+            if ($categorie) $piece->setCategorie($categorie);
+        }
+
+        // Modèle (optionnel)
+        if (array_key_exists('modele', $data)) {
+            if (empty($data['modele'])) {
+                $piece->setModele(null);
+            } else {
+                $modele = $em->getRepository(\App\Entity\Modele::class)->find($this->extractIdFromIri($data['modele']));
+                $piece->setModele($modele);
+            }
+        }
+
+        $em->flush();
+
+        return new JsonResponse(['message' => 'Pièce modifiée avec succès.'], Response::HTTP_OK);
+    }
+
+    /**
      * Supprimer une pièce (seulement si on en est le propriétaire).
      */
     #[Route('/api/pieces/{id}/delete', name: 'api_piece_delete', methods: ['DELETE'])]
