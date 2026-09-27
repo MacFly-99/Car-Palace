@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useToast } from '../context/ToastContext';
-import pieceService from '../services/pieceService';
-import Modal from '../components/Modal';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
+import pieceService from '../../services/pieceService';
+import Modal from '../../components/Modal';
 
 function MesPieces() {
   const { user } = useAuth();

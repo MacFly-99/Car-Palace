@@ -1,3 +1,6 @@
+// J'ai configuré le .htaccess pour transmettre le header Authorization à PHP, 
+// ce qui est indispensable pour l'authentification JWT derrière un serveur Apache.
+
 # Use the front controller as index file
 DirectoryIndex index.php
 

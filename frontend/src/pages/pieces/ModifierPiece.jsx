@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useToast } from '../context/ToastContext';
-import pieceService from '../services/pieceService';
-import referenceService from '../services/referenceService';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
+import pieceService from '../../services/pieceService';
+import referenceService from '../../services/referenceService';
 
 function ModifierPiece() {
   const { id } = useParams();
