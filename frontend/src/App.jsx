@@ -7,7 +7,7 @@ import Header from './components/Header';
 import Register from './pages/Register';
 import VendrePiece from './pages/VendrePiece';
 import MesPieces from './pages/MesPieces';
-
+import ModifierPiece from './pages/ModifierPiece';
 
 function Catalogue() {
   const [pieces, setPieces] = useState([]);
@@ -78,6 +78,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/vendre" element={<VendrePiece />} />
         <Route path="/mes-pieces" element={<MesPieces />} />
+        <Route path="/pieces/:id/modifier" element={<ModifierPiece />} />
       </Routes>
     </>
   );

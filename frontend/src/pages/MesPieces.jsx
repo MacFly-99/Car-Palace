@@ -104,14 +104,20 @@ function MesPieces() {
 
                 <div className="flex gap-2 ml-4">
                   <Link
-                    to={`/pieces/${piece.id}`}
-                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg transition-colors"
+                  to={`/pieces/${piece.id}`}
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg transition-colors"
                   >
                     Voir
                   </Link>
+                  <Link
+                  to={`/pieces/${piece.id}/modifier`}
+                  className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                  >
+                    Modifier
+                  </Link>
                   <button
-                    onClick={() => requestDelete(piece)}
-                    className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                  onClick={() => requestDelete(piece)}
+                  className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
                   >
                     Supprimer
                   </button>

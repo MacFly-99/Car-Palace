@@ -104,6 +104,18 @@ export const pieceService = {
     return response.data;
   },
 
+  // Récupérer les données brutes d'une pièce pour l'édition
+  getPieceForEdit: async (id) => {
+    const response = await api.get(`/pieces/${id}/edit-data`);
+    return response.data;
+  },
+
+  // Mettre à jour une pièce
+  updatePieceSecure: async (id, pieceData) => {
+    const response = await api.put(`/pieces/${id}/update`, pieceData);
+    return response.data;
+  },
+
   // Supprimer une pièce (avec vérification côté serveur)
   deletePieceSecure: async (id) => {
     const response = await api.delete(`/pieces/${id}/delete`);
