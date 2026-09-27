@@ -1,0 +1,18 @@
+# Use the front controller as index file
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 🔑 FIX CRUCIAL : Transmettre le header Authorization à PHP
+    RewriteCond %{HTTP:Authorization} ^(.+)$
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%1]
+
+    # Redirect to front controller
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+<IfModule mod_env.c>
+    SetEnv APP_ENV prod
+</IfModule>

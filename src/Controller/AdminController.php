@@ -18,6 +18,15 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_ADMIN')]
 class AdminController extends AbstractController
 {
+    #[Route('/debug-headers', name: 'api_debug_headers', methods: ['GET'])]
+    public function debugHeaders(Request $request): JsonResponse
+    {
+        return new JsonResponse([
+            'authorization' => $request->headers->get('Authorization'),
+            'all_headers' => $request->headers->all(),
+        ]);
+    }
+
     // ============ DASHBOARD / STATS ============
     #[Route('/stats', name: 'api_admin_stats', methods: ['GET'])]
     public function stats(EntityManagerInterface $em): JsonResponse
