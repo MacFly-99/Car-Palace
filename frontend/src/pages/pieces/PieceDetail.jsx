@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import pieceService from '../services/pieceService';
+import pieceService from '../../services/pieceService';
 
 function PieceDetail() {
   const { id } = useParams();

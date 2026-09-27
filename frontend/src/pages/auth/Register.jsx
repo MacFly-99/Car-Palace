@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import authService from '../services/authService';
-import { useToast } from '../context/ToastContext';
+import authService from '../../services/authService';
+import { useToast } from '../../context/ToastContext';
 
 function Register() {
   const [formData, setFormData] = useState({

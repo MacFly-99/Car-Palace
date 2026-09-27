@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useToast } from '../context/ToastContext';
-import adminService from '../services/adminService';
+import { useToast } from '../../context/ToastContext';
+import adminService from '../../services/adminService';
 
 function AdminDashboard() {
   const [stats, setStats] = useState(null);
