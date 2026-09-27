@@ -10,59 +10,47 @@ function Header() {
     navigate('/');
   };
 
+  const isAdmin = user?.roles?.includes('ROLE_ADMIN');
+
   return (
     <header className="bg-blue-600 shadow-md">
       <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-        <Link to="/" className="text-white text-2xl font-bold">
-          🚗 Car Palace
-        </Link>
+        <Link to="/" className="text-white text-2xl font-bold">🚗 Car Palace</Link>
 
         <nav className="flex items-center gap-4">
-          <Link
-            to="/"
-            className="text-white font-semibold hover:text-gray-200 transition-colors"
-          >
+          <Link to="/" className="text-white font-semibold hover:text-gray-200 transition-colors">
             Catalogue
           </Link>
 
           {user ? (
             <>
-              <Link
-                to="/mes-pieces"
-                className="text-white font-semibold hover:text-gray-200 transition-colors"
-              >
+              <Link to="/mes-pieces" className="text-white font-semibold hover:text-gray-200 transition-colors">
                 Mes pièces
               </Link>
-              <Link
-                to="/vendre"
-                className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-              >
+              <Link to="/vendre" className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
                 + Vendre
               </Link>
+
+              {/* Lien Admin visible UNIQUEMENT pour les admins */}
+              {isAdmin && (
+                <Link to="/admin" className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
+                  🛡️ Admin
+                </Link>
+              )}
+
               <div className="flex items-center gap-3 border-l border-blue-400 pl-4 ml-2">
-                <span className="text-white text-sm">
-                  👤 {user.email}
-                </span>
-                <button
-                  onClick={handleLogout}
-                  className="bg-red-500 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-red-600 transition-colors"
-                >
+                <span className="text-white text-sm">👤 {user.email}</span>
+                <button onClick={handleLogout} className="bg-red-500 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-red-600 transition-colors">
                   Déconnexion
                 </button>
               </div>
             </>
           ) : (
             <>
-              <Link
-                to="/login"
-                className="text-white font-semibold hover:text-gray-200 transition-colors"
-              >
+              <Link to="/login" className="text-white font-semibold hover:text-gray-200 transition-colors">
                 Connexion
               </Link>
-              <Link
-                to="/register"
-                className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-              >
+              <Link to="/register" className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
                 Inscription
               </Link>
             </>
