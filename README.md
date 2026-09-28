@@ -7,4 +7,6 @@ Dans la partie frontend, on trouve le dossier pages/ pour les différentes pages
 
 J'ai réorganisé mon dossier pages/ en sous-modules : admin/ pour l'espace d'administration, auth/ pour l'authentification, pieces/ pour tout ce qui touche aux pièces, et users/ pour l'espace personnel de l'utilisateur. Cette séparation par domaine métier facilite la navigation et la maintenance.
 
-Pour le fichier de routing "App.jsx", j'ai organisé les imports et les routes par domaine métier avec des commentaires de section. Cela permet de naviguer rapidement dans le code et de comprendre l'architecture de l'application en un coup d'œil
+Pour le fichier de routing "App.jsx", j'ai organisé les imports et les routes par domaine métier avec des commentaires de section. Cela permet de naviguer rapidement dans le code et de comprendre l'architecture de l'application en un coup d'œil.
+
+Le tableau de bord administrateur offre une vue agrégée du chiffre d'affaires. En cliquant dessus, un modal affiche la répartition par statut de commande sous forme de barres de progression, calculée dynamiquement à partir des données retournées par l'API Symfony.
