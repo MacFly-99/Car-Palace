@@ -20,14 +20,28 @@ function Messagerie() {
   const messagesEndRef = useRef(null);
 
   // Charger la conversation + infos de l'autre utilisateur
-  const fetchData = async () => {
+    const fetchData = async () => {
     try {
       const [conversation, otherUserData] = await Promise.all([
         messageService.getConversation(userId),
         api.get(`/utilisateurs/${userId}`).then(r => r.data).catch(() => null),
       ]);
-      setMessages(Array.isArray(conversation) ? conversation : []);
+      
+      const messagesList = Array.isArray(conversation) ? conversation : [];
+      setMessages(messagesList);
       setOtherUser(otherUserData);
+
+      // 🔑 Marquer comme lus tous les messages reçus non lus
+      const unreadMessages = messagesList.filter(
+        (msg) => !msg.isMine && !msg.lu
+      );
+      for (const msg of unreadMessages) {
+        try {
+          await messageService.markAsRead(msg.id);
+        } catch (err) {
+          // Silencieux
+        }
+      }
     } catch (err) {
       console.error(err);
       addToast('Impossible de charger la conversation.', 'error');
@@ -35,7 +49,7 @@ function Messagerie() {
       setLoading(false);
     }
   };
-
+  
   useEffect(() => {
     fetchData();
     // Rafraîchir toutes les 5 secondes
