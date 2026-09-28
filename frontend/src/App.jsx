@@ -34,6 +34,7 @@ import ModifierPiece from './pages/pieces/ModifierPiece';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUtilisateurs from './pages/admin/AdminUtilisateurs';
 import AdminPieces from './pages/admin/AdminPieces';
+import AdminCommandes from './pages/admin/AdminCommandes';
 
 // ==============================================
 // COMPOSANT APP (Routing principal)
@@ -68,6 +69,7 @@ function App() {
         <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
         <Route path="/admin/utilisateurs" element={<AdminRoute><AdminUtilisateurs /></AdminRoute>} />
         <Route path="/admin/pieces" element={<AdminRoute><AdminPieces /></AdminRoute>} />
+        <Route path="/admin/commandes" element={<AdminRoute><AdminCommandes /></AdminRoute>} />
       </Routes>
     </>
   );
