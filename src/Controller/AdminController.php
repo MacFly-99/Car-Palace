@@ -18,15 +18,6 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_ADMIN')]
 class AdminController extends AbstractController
 {
-    #[Route('/debug-headers', name: 'api_debug_headers', methods: ['GET'])]
-    public function debugHeaders(Request $request): JsonResponse
-    {
-        return new JsonResponse([
-            'authorization' => $request->headers->get('Authorization'),
-            'all_headers' => $request->headers->all(),
-        ]);
-    }
-
     // ============ DASHBOARD / STATS ============
     #[Route('/stats', name: 'api_admin_stats', methods: ['GET'])]
     public function stats(EntityManagerInterface $em): JsonResponse
@@ -36,8 +27,23 @@ class AdminController extends AbstractController
         $nbCommandes = $em->getRepository(Commande::class)->count([]);
         $nbAvis = $em->getRepository(Avis::class)->count([]);
 
-        // Chiffre d'affaires total (somme des totaux de commandes)
+        // Chiffre d'affaires total
         $ca = $em->createQuery('SELECT SUM(c.total) FROM App\Entity\Commande c')->getSingleScalarResult() ?? 0;
+
+        // 🔍 Nouveau : CA et nombre de commandes par statut
+        $caParStatut = $em->createQuery(
+            'SELECT c.statut, SUM(c.total) as total, COUNT(c.id) as nombre 
+             FROM App\Entity\Commande c 
+             GROUP BY c.statut'
+        )->getResult();
+
+        $caDetails = [];
+        foreach ($caParStatut as $row) {
+            $caDetails[$row['statut']] = [
+                'total' => round((float) $row['total'], 2),
+                'nombre' => (int) $row['nombre'],
+            ];
+        }
 
         return new JsonResponse([
             'utilisateurs' => $nbUsers,
@@ -45,6 +51,7 @@ class AdminController extends AbstractController
             'commandes' => $nbCommandes,
             'avis' => $nbAvis,
             'chiffre_affaires' => round((float) $ca, 2),
+            'ca_par_statut' => $caDetails,
         ]);
     }
 
