@@ -29,9 +29,9 @@ class AppFixtures extends Fixture
     {
         $faker = Factory::create('fr_FR');
 
-        // 1. Création des Utilisateurs (1 Admin + 5 utilisateurs classiques)
+        // ============ 1. UTILISATEURS ============
         $users = [];
-        
+
         // Admin
         $admin = new Utilisateur();
         $admin->setEmail('admin@car-palace.fr');
@@ -60,7 +60,7 @@ class AppFixtures extends Fixture
             $users[] = $user;
         }
 
-        // 2. Création des Marques et Modèles
+        // ============ 2. MARQUES ET MODÈLES ============
         $marquesData = [
             'Renault' => ['Clio', 'Megane'],
             'Peugeot' => ['208', '308'],
@@ -91,7 +91,7 @@ class AppFixtures extends Fixture
             }
         }
 
-        // 3. Création des Catégories
+        // ============ 3. CATÉGORIES ============
         $categoriesData = ['Freinage', 'Moteur', 'Eclairage', 'Carrosserie'];
         $categories = [];
         foreach ($categoriesData as $nomCat) {
@@ -101,7 +101,7 @@ class AppFixtures extends Fixture
             $categories[] = $categorie;
         }
 
-        // 4. Création des Pièces
+        // ============ 4. PIÈCES ============
         $pieces = [];
         for ($i = 0; $i < 30; $i++) {
             $piece = new Piece();
@@ -110,7 +110,7 @@ class AppFixtures extends Fixture
             $piece->setPrix($faker->randomFloat(2, 20, 500));
             $piece->setEtat($faker->randomElement(['Neuf', 'Très bon état', 'Bon état', 'Usure normale']));
             $piece->setAnnee($faker->numberBetween(2000, 2023));
-            $piece->setStatut('Disponible');
+            $piece->setStatut($faker->randomElement(['Disponible', 'Disponible', 'Disponible', 'Vendu', 'Réservé']));
             $piece->setMarque($faker->randomElement($marques));
             $piece->setModele($faker->randomElement($modeles));
             $piece->setCategorie($faker->randomElement($categories));
@@ -118,14 +118,14 @@ class AppFixtures extends Fixture
             $manager->persist($piece);
             $pieces[] = $piece;
 
-            // Ajout d'une photo pour chaque pièce
+            // Photo pour chaque pièce
             $photo = new Photo();
-            $photo->setUrl('https://via.placeholder.com/300x200?text=Piece+Auto');
+            $photo->setUrl('https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=400&h=200&fit=crop');
             $photo->setPiece($piece);
             $manager->persist($photo);
         }
 
-        // 5. Création des Avis
+        // ============ 5. AVIS ============
         for ($i = 0; $i < 15; $i++) {
             $avis = new Avis();
             $avis->setNote($faker->numberBetween(1, 5));
@@ -137,29 +137,33 @@ class AppFixtures extends Fixture
             $manager->persist($avis);
         }
 
-        // 6. Création d'une Commande pour l'utilisateur 1
-        $commande = new Commande();
-        $commande->setDateCommande(new \DateTime());
-        $commande->setStatut('En attente');
-        $commande->setAcheteur($users[1]); // On prend le premier utilisateur classique
-        $commande->setTotal(0); // On mettra à jour le total après
-        $manager->persist($commande);
+        // ============ 6. COMMANDES (5 commandes) ============
+        $statuts = ['En attente', 'Expédiée', 'Livrée', 'Annulée'];
+        
+        for ($i = 0; $i < 5; $i++) {
+            $commande = new Commande();
+            $commande->setDateCommande(new \DateTime('-' . rand(1, 30) . ' days'));
+            $commande->setStatut($faker->randomElement($statuts));
+            $commande->setAcheteur($faker->randomElement($users));
+            $commande->setTotal(0);
+            $manager->persist($commande);
 
-        // Ajout de 2 pièces à cette commande
-        $total = 0;
-        for ($i = 0; $i < 2; $i++) {
-            $piece = $faker->randomElement($pieces);
-            $ligne = new LigneCommande();
-            $ligne->setCommande($commande);
-            $ligne->setPiece($piece);
-            $ligne->setQuantite(1);
-            $ligne->setPrixUnitaire($piece->getPrix());
-            $manager->persist($ligne);
-            $total += $piece->getPrix();
+            // Ajout de 1 à 3 pièces aléatoires
+            $total = 0;
+            $nbPieces = rand(1, 3);
+            for ($j = 0; $j < $nbPieces; $j++) {
+                $piece = $faker->randomElement($pieces);
+                $ligne = new LigneCommande();
+                $ligne->setCommande($commande);
+                $ligne->setPiece($piece);
+                $ligne->setQuantite(rand(1, 2));
+                $ligne->setPrixUnitaire($piece->getPrix());
+                $manager->persist($ligne);
+                $total += $piece->getPrix() * $ligne->getQuantite();
+            }
+            $commande->setTotal($total);
         }
-        $commande->setTotal($total);
 
-        // Enregistrement en base de données
         $manager->flush();
     }
 }
