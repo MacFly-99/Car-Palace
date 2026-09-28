@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import pieceService from '../../services/pieceService';
 import avisService from '../../services/avisService';
+import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 
@@ -12,15 +13,12 @@ function PieceDetail() {
 
   const [piece, setPiece] = useState(null);
   const [avis, setAvis] = useState([]);
+  const [vendeurEmail, setVendeurEmail] = useState(null);
+  const [vendeurId, setVendeurId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Formulaire d'avis
-  const [formData, setFormData] = useState({
-    note: 5,
-    titre: '',
-    description: '',
-  });
+  const [formData, setFormData] = useState({ note: 5, titre: '', description: '' });
   const [submitting, setSubmitting] = useState(false);
 
   const fetchData = async () => {
@@ -31,6 +29,18 @@ function PieceDetail() {
       ]);
       setPiece(pieceData);
       setAvis(Array.isArray(avisData) ? avisData : []);
+
+      // Récupérer les infos du vendeur
+      if (pieceData.vendeur) {
+        const vId = pieceData.vendeur.split('/').pop();
+        setVendeurId(vId);
+        try {
+          const response = await api.get(`/utilisateurs/${vId}`);
+          setVendeurEmail(response.data.email);
+        } catch (err) {
+          // Silencieux si non authentifié
+        }
+      }
       setLoading(false);
     } catch (err) {
       console.error(err);
@@ -59,7 +69,6 @@ function PieceDetail() {
       });
       addToast('Avis publié avec succès !', 'success');
       setFormData({ note: 5, titre: '', description: '' });
-      // Recharger les avis
       const newAvis = await avisService.getAvisByPiece(id);
       setAvis(newAvis);
     } catch (err) {
@@ -70,7 +79,6 @@ function PieceDetail() {
     }
   };
 
-  // Calcul de la note moyenne
   const noteMoyenne =
     avis.length > 0
       ? (avis.reduce((sum, a) => sum + a.note, 0) / avis.length).toFixed(1)
@@ -81,8 +89,9 @@ function PieceDetail() {
     return '★'.repeat(full) + '☆'.repeat(5 - full);
   };
 
-  // Vérifier si l'utilisateur a déjà laissé un avis
   const dejaLaisseAvis = user && avis.some((a) => a.auteurEmail === user.email);
+  const isVendeur = user && vendeurEmail === user.email;
+  const canContact = user && vendeurId && !isVendeur;
 
   if (loading) return <div className="min-h-screen flex items-center justify-center"><p>Chargement...</p></div>;
   if (error) return <div className="min-h-screen flex items-center justify-center"><p className="text-red-600">{error}</p></div>;
@@ -106,7 +115,7 @@ function PieceDetail() {
             <h1 className="text-3xl font-bold text-gray-800 mb-4">{piece.titre}</h1>
             <p className="text-gray-600 mb-6">{piece.description}</p>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 mb-6">
               <div>
                 <span className="text-sm text-gray-500">Prix</span>
                 <p className="text-2xl font-bold text-blue-600">{piece.prix} €</p>
@@ -124,26 +133,43 @@ function PieceDetail() {
                 <p className="text-lg font-semibold text-green-600">{piece.statut}</p>
               </div>
             </div>
+
+            {/* Bouton contacter le vendeur */}
+            {canContact && (
+              <Link
+                to={`/messages/${vendeurId}?piece=${piece.id}`}
+                className="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+              >
+                💬 Contacter le vendeur
+              </Link>
+            )}
+
+            {!user && (
+              <p className="text-sm text-gray-500 italic">
+                <Link to="/login" className="text-blue-600 underline">Connecte-toi</Link> pour contacter le vendeur.
+              </p>
+            )}
+
+            {isVendeur && (
+              <p className="text-sm text-gray-500 italic">
+                C'est ta propre annonce.
+              </p>
+            )}
           </div>
         </div>
 
         {/* Section Avis */}
         <div className="bg-white rounded-xl shadow-md p-8">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">
-              Avis ({avis.length})
-            </h2>
+            <h2 className="text-2xl font-bold text-gray-800">Avis ({avis.length})</h2>
             {noteMoyenne && (
               <div className="text-right">
                 <div className="text-2xl text-yellow-500">{renderStars(parseFloat(noteMoyenne))}</div>
-                <p className="text-sm text-gray-600">
-                  {noteMoyenne} / 5 sur {avis.length} avis
-                </p>
+                <p className="text-sm text-gray-600">{noteMoyenne} / 5 sur {avis.length} avis</p>
               </div>
             )}
           </div>
 
-          {/* Formulaire d'avis */}
           {user && !dejaLaisseAvis && (
             <form onSubmit={handleSubmitAvis} className="bg-gray-50 p-6 rounded-lg mb-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Laisser un avis</h3>
@@ -204,9 +230,7 @@ function PieceDetail() {
 
           {!user && (
             <div className="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg mb-6">
-              <Link to="/login" className="font-semibold underline">
-                Connecte-toi
-              </Link>{' '}
+              <Link to="/login" className="font-semibold underline">Connecte-toi</Link>{' '}
               pour laisser un avis sur cette pièce.
             </div>
           )}
@@ -217,7 +241,6 @@ function PieceDetail() {
             </div>
           )}
 
-          {/* Liste des avis */}
           {avis.length === 0 ? (
             <p className="text-center text-gray-500 py-8">
               Aucun avis pour le moment. Sois le premier !

@@ -27,6 +27,8 @@ import Register from './pages/auth/Register';
 import VendrePiece from './pages/pieces/VendrePiece';
 import MesPieces from './pages/users/MesPieces';
 import ModifierPiece from './pages/pieces/ModifierPiece';
+import Messagerie from './pages/users/Messagerie';
+import MesMessages from './pages/users/MesMessages';
 
 // ==============================================
 // IMPORTS PAGES - ESPACE ADMIN
@@ -63,6 +65,8 @@ function App() {
         <Route path="/vendre" element={<VendrePiece />} />
         <Route path="/mes-pieces" element={<MesPieces />} />
         <Route path="/pieces/:id/modifier" element={<ModifierPiece />} />
+        <Route path="/messages/:userId" element={<Messagerie />} />
+        <Route path="/mes-messages" element={<MesMessages />} />
 
         {/* ============================================== */}
         {/* ESPACE ADMIN (nécessite ROLE_ADMIN) */}
