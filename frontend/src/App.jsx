@@ -35,6 +35,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUtilisateurs from './pages/admin/AdminUtilisateurs';
 import AdminPieces from './pages/admin/AdminPieces';
 import AdminCommandes from './pages/admin/AdminCommandes';
+import AdminAvis from './pages/admin/AdminAvis';
 
 // ==============================================
 // COMPOSANT APP (Routing principal)
@@ -70,6 +71,7 @@ function App() {
         <Route path="/admin/utilisateurs" element={<AdminRoute><AdminUtilisateurs /></AdminRoute>} />
         <Route path="/admin/pieces" element={<AdminRoute><AdminPieces /></AdminRoute>} />
         <Route path="/admin/commandes" element={<AdminRoute><AdminCommandes /></AdminRoute>} />
+        <Route path="/admin/avis" element={<AdminRoute><AdminAvis /></AdminRoute>} />
       </Routes>
     </>
   );
