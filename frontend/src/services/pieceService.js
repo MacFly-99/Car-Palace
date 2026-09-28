@@ -2,27 +2,30 @@ import api from './api';
 
 export const pieceService = {
   /**
-   * Récupère la liste de toutes les pièces.
-   * On peut passer des filtres en paramètre (ex: { marque: '/api/marques/1', prix: 'ASC' })
+   * Récupère la liste des pièces avec filtres optionnels.
+   * @param {Object} filters - { titre, marque, categorie, etat, prixMin, prixMax }
    */
     getAllPieces: async (filters = {}) => {
-    const response = await api.get('/pieces', { params: filters });
-    
-    // On vérifie toutes les façons possibles dont l'API peut renvoyer les données
-    if (response.data['hydra:member']) {
-      return response.data['hydra:member']; // Format JSON-LD classique
-    }
-    if (response.data.member) {
-      return response.data.member; // Format JSON-LD alternatif
-    }
-    if (Array.isArray(response.data)) {
-      return response.data; // Si c'est déjà un tableau direct
-    }
-    
-    // En dernier recours, on renvoie un tableau vide pour éviter le crash
+    const params = {};
+
+    if (filters.titre) params.titre = filters.titre;
+    if (filters.marque) params.marque = filters.marque;
+    if (filters.categorie) params.categorie = filters.categorie;
+    if (filters.etat) params.etat = filters.etat;
+    if (filters.prixMin) params['prix[gte]'] = filters.prixMin;
+    if (filters.prixMax) params['prix[lte]'] = filters.prixMax;
+
+    const response = await api.get('/pieces', { params });
+    const data = response.data;
+
+    // Gérer TOUS les formats possibles (API Platform 2.x et 3.x)
+    if (Array.isArray(data)) return data;
+    if (data.member && Array.isArray(data.member)) return data.member;
+    if (data['hydra:member'] && Array.isArray(data['hydra:member'])) return data['hydra:member'];
+
     return [];
   },
-
+  
   /**
    * Récupère une pièce par son ID.
    */
@@ -32,8 +35,7 @@ export const pieceService = {
   },
 
   /**
-   * Crée une nouvelle pièce. Nécessite d'être connecté (token JWT).
-   * @param {Object} pieceData - Les données de la pièce à créer
+   * Crée une nouvelle pièce. Nécessite d'être connecté.
    */
   createPiece: async (pieceData) => {
     const response = await api.post('/pieces', pieceData);
@@ -41,9 +43,7 @@ export const pieceService = {
   },
 
   /**
-   * Met à jour une pièce existante. Nécessite d'être connecté.
-   * @param {number} id - L'ID de la pièce
-   * @param {Object} pieceData - Les nouvelles données
+   * Met à jour une pièce existante.
    */
   updatePiece: async (id, pieceData) => {
     const response = await api.put(`/pieces/${id}`, pieceData);
@@ -51,8 +51,7 @@ export const pieceService = {
   },
 
   /**
-   * Supprime une pièce. Nécessite d'être connecté.
-   * @param {number} id - L'ID de la pièce à supprimer
+   * Supprime une pièce.
    */
   deletePiece: async (id) => {
     const response = await api.delete(`/pieces/${id}`);
@@ -60,65 +59,75 @@ export const pieceService = {
   },
 
   /**
-   * Récupère toutes les pièces d'un vendeur spécifique.
-   * @param {number} vendeurId - L'ID du vendeur
+   * Récupère les pièces d'un vendeur spécifique.
    */
   getPiecesByVendeur: async (vendeurId) => {
     const response = await api.get(`/pieces`, {
       params: { vendeur: `/api/utilisateurs/${vendeurId}` }
     });
-    return response.data['hydra:member'] || response.data;
+    if (response.data['hydra:member']) return response.data['hydra:member'];
+    return Array.isArray(response.data) ? response.data : [];
   },
 
   /**
-   * Récupère toutes les pièces d'une catégorie spécifique.
-   * @param {number} categorieId - L'ID de la catégorie
+   * Récupère les pièces d'une catégorie spécifique.
    */
   getPiecesByCategorie: async (categorieId) => {
     const response = await api.get(`/pieces`, {
       params: { categorie: `/api/categories/${categorieId}` }
     });
-    return response.data['hydra:member'] || response.data;
+    if (response.data['hydra:member']) return response.data['hydra:member'];
+    return Array.isArray(response.data) ? response.data : [];
   },
 
   /**
-   * Récupère toutes les pièces d'une marque spécifique.
-   * @param {number} marqueId - L'ID de la marque
+   * Récupère les pièces d'une marque spécifique.
    */
   getPiecesByMarque: async (marqueId) => {
     const response = await api.get(`/pieces`, {
       params: { marque: `/api/marques/${marqueId}` }
     });
-    return response.data['hydra:member'] || response.data;
+    if (response.data['hydra:member']) return response.data['hydra:member'];
+    return Array.isArray(response.data) ? response.data : [];
   },
 
-  // Créer une pièce via le contrôleur sécurisé
+  /**
+   * Créer une pièce via le contrôleur sécurisé.
+   */
   createPieceSecure: async (pieceData) => {
     const response = await api.post('/pieces/create', pieceData);
     return response.data;
   },
 
-  // Récupérer les pièces de l'utilisateur connecté
+  /**
+   * Récupérer les pièces de l'utilisateur connecté.
+   */
   getMesPieces: async () => {
     const response = await api.get('/mes-pieces');
     return response.data;
   },
 
-  // Récupérer les données brutes d'une pièce pour l'édition
+  /**
+   * Supprimer une pièce (avec vérification côté serveur).
+   */
+  deletePieceSecure: async (id) => {
+    const response = await api.delete(`/pieces/${id}/delete`);
+    return response.data;
+  },
+
+  /**
+   * Récupérer les données brutes d'une pièce pour l'édition.
+   */
   getPieceForEdit: async (id) => {
     const response = await api.get(`/pieces/${id}/edit-data`);
     return response.data;
   },
 
-  // Mettre à jour une pièce
+  /**
+   * Mettre à jour une pièce.
+   */
   updatePieceSecure: async (id, pieceData) => {
     const response = await api.put(`/pieces/${id}/update`, pieceData);
-    return response.data;
-  },
-
-  // Supprimer une pièce (avec vérification côté serveur)
-  deletePieceSecure: async (id) => {
-    const response = await api.delete(`/pieces/${id}/delete`);
     return response.data;
   },
 };

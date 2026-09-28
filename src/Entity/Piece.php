@@ -2,15 +2,24 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Metadata\ApiResource;
 use App\Repository\PieceRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use ApiPlatform\Metadata\ApiResource;
 
-#[ApiResource]
 #[ORM\Entity(repositoryClass: PieceRepository::class)]
+#[ApiResource]
+#[ApiFilter(SearchFilter::class, properties: [
+    'titre' => 'partial',
+    'etat' => 'exact',
+    'marque' => 'exact',
+    'categorie' => 'exact',
+    'vendeur' => 'exact',
+])]
 class Piece
 {
     #[ORM\Id]
@@ -55,26 +64,12 @@ class Piece
     /**
      * @var Collection<int, Photo>
      */
-    #[ORM\OneToMany(targetEntity: Photo::class, mappedBy: 'piece')]
+    #[ORM\OneToMany(targetEntity: Photo::class, mappedBy: 'piece', orphanRemoval: true)]
     private Collection $photos;
-
-    /**
-     * @var Collection<int, LigneCommande>
-     */
-    #[ORM\OneToMany(targetEntity: LigneCommande::class, mappedBy: 'piece')]
-    private Collection $ligneCommandes;
-
-    /**
-     * @var Collection<int, Avis>
-     */
-    #[ORM\OneToMany(targetEntity: Avis::class, mappedBy: 'piece')]
-    private Collection $avis;
 
     public function __construct()
     {
         $this->photos = new ArrayCollection();
-        $this->ligneCommandes = new ArrayCollection();
-        $this->avis = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -90,7 +85,6 @@ class Piece
     public function setTitre(string $titre): static
     {
         $this->titre = $titre;
-
         return $this;
     }
 
@@ -102,7 +96,6 @@ class Piece
     public function setDescription(?string $description): static
     {
         $this->description = $description;
-
         return $this;
     }
 
@@ -114,7 +107,6 @@ class Piece
     public function setPrix(string $prix): static
     {
         $this->prix = $prix;
-
         return $this;
     }
 
@@ -126,7 +118,6 @@ class Piece
     public function setEtat(string $etat): static
     {
         $this->etat = $etat;
-
         return $this;
     }
 
@@ -138,7 +129,6 @@ class Piece
     public function setAnnee(?int $annee): static
     {
         $this->annee = $annee;
-
         return $this;
     }
 
@@ -150,7 +140,6 @@ class Piece
     public function setStatut(string $statut): static
     {
         $this->statut = $statut;
-
         return $this;
     }
 
@@ -162,7 +151,6 @@ class Piece
     public function setMarque(?Marque $marque): static
     {
         $this->marque = $marque;
-
         return $this;
     }
 
@@ -174,7 +162,6 @@ class Piece
     public function setModele(?Modele $modele): static
     {
         $this->modele = $modele;
-
         return $this;
     }
 
@@ -186,7 +173,6 @@ class Piece
     public function setCategorie(?Categorie $categorie): static
     {
         $this->categorie = $categorie;
-
         return $this;
     }
 
@@ -198,7 +184,6 @@ class Piece
     public function setVendeur(?Utilisateur $vendeur): static
     {
         $this->vendeur = $vendeur;
-
         return $this;
     }
 
@@ -216,7 +201,6 @@ class Piece
             $this->photos->add($photo);
             $photo->setPiece($this);
         }
-
         return $this;
     }
 
@@ -227,65 +211,6 @@ class Piece
                 $photo->setPiece(null);
             }
         }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, LigneCommande>
-     */
-    public function getLigneCommandes(): Collection
-    {
-        return $this->ligneCommandes;
-    }
-
-    public function addLigneCommande(LigneCommande $ligneCommande): static
-    {
-        if (!$this->ligneCommandes->contains($ligneCommande)) {
-            $this->ligneCommandes->add($ligneCommande);
-            $ligneCommande->setPiece($this);
-        }
-
-        return $this;
-    }
-
-    public function removeLigneCommande(LigneCommande $ligneCommande): static
-    {
-        if ($this->ligneCommandes->removeElement($ligneCommande)) {
-            if ($ligneCommande->getPiece() === $this) {
-                $ligneCommande->setPiece(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Avis>
-     */
-    public function getAvis(): Collection
-    {
-        return $this->avis;
-    }
-
-    public function addAvi(Avis $avi): static
-    {
-        if (!$this->avis->contains($avi)) {
-            $this->avis->add($avi);
-            $avi->setPiece($this);
-        }
-
-        return $this;
-    }
-
-    public function removeAvi(Avis $avi): static
-    {
-        if ($this->avis->removeElement($avi)) {
-            if ($avi->getPiece() === $this) {
-                $avi->setPiece(null);
-            }
-        }
-
         return $this;
     }
 }
