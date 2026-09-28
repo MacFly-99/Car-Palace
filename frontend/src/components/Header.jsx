@@ -1,12 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import messageService from '../services/messageService';
 
 function Header() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Charger le nombre de messages non lus
+  useEffect(() => {
+    if (!user) {
+      setUnreadCount(0);
+      return;
+    }
+
+    const fetchUnread = async () => {
+      try {
+        const count = await messageService.getUnreadCount();
+        setUnreadCount(count);
+      } catch (err) {
+        // Silencieux si erreur
+      }
+    };
+
+    fetchUnread();
+    // Rafraîchir toutes les 10 secondes
+    const interval = setInterval(fetchUnread, 10000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   const handleLogout = () => {
     logout();
@@ -48,13 +72,10 @@ function Header() {
 
             {isSearchOpen && (
               <>
-                {/* Overlay invisible pour fermer au clic extérieur */}
                 <div
                   className="fixed inset-0 z-30"
                   onClick={() => setIsSearchOpen(false)}
                 />
-
-                {/* Dropdown */}
                 <div className="absolute right-0 top-12 w-80 sm:w-96 bg-white rounded-lg shadow-2xl p-4 z-40">
                   <form onSubmit={handleSearch}>
                     <label className="block text-gray-700 font-semibold mb-2 text-sm">
@@ -90,6 +111,20 @@ function Header() {
               <Link to="/mes-pieces" className="text-white font-semibold hover:text-gray-200 transition-colors">
                 Mes pièces
               </Link>
+
+              {/* Lien Messages avec badge */}
+              <Link
+                to="/mes-messages"
+                className="text-white font-semibold hover:text-gray-200 transition-colors relative"
+              >
+                💬 Messages
+                {unreadCount > 0 && (
+                  <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                    {unreadCount}
+                  </span>
+                )}
+              </Link>
+
               <Link to="/vendre" className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
                 + Vendre
               </Link>

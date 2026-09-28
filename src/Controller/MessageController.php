@@ -145,6 +145,24 @@ class MessageController extends AbstractController
     }
 
     /**
+     * Compter les messages non lus par l'utilisateur connecté.
+     */
+    #[Route('/api/messages/unread-count', name: 'api_messages_unread_count', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function unreadCount(DocumentManager $dm): JsonResponse
+    {
+        /** @var Utilisateur $user */
+        $user = $this->getUser();
+
+        $messages = $dm->getRepository(Message::class)->findBy([
+            'destinataireId' => $user->getId(),
+            'lu' => false,
+        ]);
+
+        return new JsonResponse(['count' => count($messages)]);
+    }
+
+    /**
      * Utilitaire : formater les messages pour l'API.
      */
     private function serializeMessages($messages, EntityManagerInterface $em, int $currentUserId): array
