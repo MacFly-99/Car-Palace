@@ -50,31 +50,15 @@ function Catalogue() {
   // Filtrage LOCAL (aucun appel API, ultra rapide)
   const filteredPieces = useMemo(() => {
     return allPieces.filter((piece) => {
-      // Filtre titre (recherche partielle, insensible à la casse)
       if (filters.titre) {
         const searchLower = filters.titre.toLowerCase();
         if (!piece.titre.toLowerCase().includes(searchLower)) return false;
       }
-
-      // Filtre marque (IRI)
       if (filters.marque && piece.marque !== filters.marque) return false;
-
-      // Filtre catégorie (IRI)
       if (filters.categorie && piece.categorie !== filters.categorie) return false;
-
-      // Filtre état
       if (filters.etat && piece.etat !== filters.etat) return false;
-
-      // Filtre prix min
-      if (filters.prixMin) {
-        if (parseFloat(piece.prix) < parseFloat(filters.prixMin)) return false;
-      }
-
-      // Filtre prix max
-      if (filters.prixMax) {
-        if (parseFloat(piece.prix) > parseFloat(filters.prixMax)) return false;
-      }
-
+      if (filters.prixMin && parseFloat(piece.prix) < parseFloat(filters.prixMin)) return false;
+      if (filters.prixMax && parseFloat(piece.prix) > parseFloat(filters.prixMax)) return false;
       return true;
     });
   }, [allPieces, filters]);
@@ -96,6 +80,10 @@ function Catalogue() {
 
   const activeFiltersCount = Object.values(filters).filter((v) => v !== '').length;
 
+  // Fonctions utilitaires pour les badges
+  const getMarqueName = (iri) => marques.find((m) => `/api/marques/${m.id}` === iri)?.nom;
+  const getCategorieName = (iri) => categories.find((c) => `/api/categories/${c.id}` === iri)?.nom;
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -106,9 +94,25 @@ function Catalogue() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Barre de recherche et filtres */}
+      {/* ========== SECTION HERO ========== */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-16 px-6">
+        <div className="max-w-7xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            🚗 Trouve la pièce qu'il te faut
+          </h1>
+          <p className="text-lg md:text-xl opacity-90 mb-2">
+            Des milliers de pièces détachées auto, neuves et d'occasion
+          </p>
+          <p className="text-sm opacity-75">
+            Marques populaires, milieu de gamme et luxe — Livraison rapide partout en France
+          </p>
+        </div>
+      </div>
+
+      {/* ========== BARRE DE RECHERCHE ET FILTRES ========== */}
       <div className="bg-white shadow-md sticky top-0 z-10">
         <div className="max-w-7xl mx-auto p-6">
+          {/* Recherche principale */}
           <div className="mb-4">
             <input
               type="text"
@@ -120,6 +124,7 @@ function Catalogue() {
             />
           </div>
 
+          {/* Filtres avancés */}
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
             <select
               name="marque"
@@ -177,6 +182,38 @@ function Catalogue() {
             />
           </div>
 
+          {/* ========== BADGES FILTRES ACTIFS ========== */}
+          {activeFiltersCount > 0 && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {filters.titre && (
+                <span className="inline-flex items-center gap-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold">
+                  🔍 "{filters.titre}"
+                </span>
+              )}
+              {filters.marque && getMarqueName(filters.marque) && (
+                <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
+                  🏷️ {getMarqueName(filters.marque)}
+                </span>
+              )}
+              {filters.categorie && getCategorieName(filters.categorie) && (
+                <span className="inline-flex items-center gap-1 bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-xs font-semibold">
+                  📁 {getCategorieName(filters.categorie)}
+                </span>
+              )}
+              {filters.etat && (
+                <span className="inline-flex items-center gap-1 bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-semibold">
+                  ⭐ {filters.etat}
+                </span>
+              )}
+              {(filters.prixMin || filters.prixMax) && (
+                <span className="inline-flex items-center gap-1 bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-semibold">
+                  💰 {filters.prixMin || '0'} € - {filters.prixMax || '∞'} €
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Résumé */}
           <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
             <span>
               <strong>{filteredPieces.length}</strong> pièce{filteredPieces.length > 1 ? 's' : ''} trouvée{filteredPieces.length > 1 ? 's' : ''}
@@ -193,7 +230,7 @@ function Catalogue() {
         </div>
       </div>
 
-      {/* Grille des pièces */}
+      {/* ========== GRILLE DES PIÈCES ========== */}
       <div className="p-8">
         <div className="max-w-7xl mx-auto">
           {filteredPieces.length === 0 ? (

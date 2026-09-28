@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import messageService from '../services/messageService';
+import logoIcon from '../assets/logo-icon.png';
 
 function Header() {
   const { user, logout } = useAuth();
@@ -51,8 +52,16 @@ function Header() {
   return (
     <header className="bg-blue-600 shadow-md relative z-50">
       <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-        <Link to="/" className="text-white text-2xl font-bold">
-          🚗 Car Palace
+        {/* Logo + Nom */}
+        <Link to="/" className="flex items-center gap-3">
+          <div className="bg-white rounded-xl p-1 w-11 h-11 flex items-center justify-center">
+            <img
+              src={logoIcon}
+              alt="Car Palace"
+              className="w-full h-full object-contain"
+            />
+          </div>
+          <span className="text-white text-2xl font-bold">Car Palace</span>
         </Link>
 
         <nav className="flex items-center gap-4">
@@ -137,7 +146,10 @@ function Header() {
 
               <div className="flex items-center gap-3 border-l border-blue-400 pl-4 ml-2">
                 <span className="text-white text-sm">👤 {user.email}</span>
-                <button onClick={handleLogout} className="bg-red-500 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-red-600 transition-colors">
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-500 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-red-600 transition-colors"
+                >
                   Déconnexion
                 </button>
               </div>

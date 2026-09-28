@@ -8,6 +8,7 @@ import { Routes, Route } from 'react-router-dom';
 // ==============================================
 import Header from './components/Header';
 import AdminRoute from './components/AdminRoute';
+import Footer from './components/Footer';
 
 // ==============================================
 // IMPORTS PAGES - ESPACE PUBLIC
@@ -77,6 +78,7 @@ function App() {
         <Route path="/admin/commandes" element={<AdminRoute><AdminCommandes /></AdminRoute>} />
         <Route path="/admin/avis" element={<AdminRoute><AdminAvis /></AdminRoute>} />
       </Routes>
+      <Footer />
     </>
   );
 }
