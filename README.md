@@ -10,3 +10,10 @@ J'ai réorganisé mon dossier pages/ en sous-modules : admin/ pour l'espace d'ad
 Pour le fichier de routing "App.jsx", j'ai organisé les imports et les routes par domaine métier avec des commentaires de section. Cela permet de naviguer rapidement dans le code et de comprendre l'architecture de l'application en un coup d'œil.
 
 Le tableau de bord administrateur offre une vue agrégée du chiffre d'affaires. En cliquant dessus, un modal affiche la répartition par statut de commande sous forme de barres de progression, calculée dynamiquement à partir des données retournées par l'API Symfony.
+
+
+Quand on utilise inversedBy dans Doctrine, la propriété inverse DOIT exister dans l'entité cible. Sinon, ça génère des erreurs de sérialisation.
+Pour éviter ce genre de problème, on peut :
+- soit déclarer les deux côtés de la relation (avec $ligneCommandes dans Piece).
+- soit utiliser une relation unidirectionnelle (juste ManyToOne sans inversedBy).
+J'ai choisi la 2ème solution (plus simple, suffisante pour mon projet).
