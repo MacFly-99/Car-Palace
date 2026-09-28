@@ -32,4 +32,8 @@ security:
     access_control:
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/register, roles: PUBLIC_ACCESS }
+        - { path: ^/api/pieces, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/marques, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/categories, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/modeles, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
