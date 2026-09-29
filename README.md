@@ -20,3 +20,7 @@ J'ai créé un Document MongoDB Message avec les annotations ODM (#[MongoDB\Docu
 
 J'ai ajouté un système de notification en temps quasi-réel qui interroge périodiquement l'API pour compter les messages non lus. Le badge s'affiche uniquement s'il y a au moins un message non lu, et disparaît dès que la conversation est consultée.
 J'utilise un système de polling toutes les 10 secondes pour rafraîchir le compteur de messages non lus. C'est un compromis entre réactivité et charge serveur. En production, je remplacerais ce système par Mercure (WebSocket) qui permet du vrai temps réel sans polling.
+
+Pour la partie test, j'ai désactivé l'audit de sécurité de Composer pour ce projet car certaines dépendances de développement (notamment celles utilisées par PHPUnit) déclenchent des alertes de sécurité non applicables à mon usage.
+
+J'ai écrit 17 tests unitaires avec PHPUnit couvrant les principales entités du domaine métier : Utilisateur (rôles), Piece (attributs, relations), Marque (relation avec Modèle), Categorie (relation avec Piece). Ces tests garantissent que la logique métier fonctionne correctement, indépendamment de la couche HTTP ou de la base de données.
