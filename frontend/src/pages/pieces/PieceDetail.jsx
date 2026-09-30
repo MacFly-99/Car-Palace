@@ -23,35 +23,35 @@ function PieceDetail() {
 
   const fetchData = async () => {
     try {
-      const [pieceData, avisData] = await Promise.all([
-        pieceService.getPieceById(id),
-        avisService.getAvisByPiece(id),
-      ]);
-      setPiece(pieceData);
-      setAvis(Array.isArray(avisData) ? avisData : []);
+        const [pieceData, avisData] = await Promise.all([
+            pieceService.getPieceById(id),
+            avisService.getAvisByPiece(id),
+        ]);
+        setPiece(pieceData);
+        setAvis(Array.isArray(avisData) ? avisData : []);
 
-      // Récupérer les infos du vendeur
-      if (pieceData.vendeur) {
-        const vId = pieceData.vendeur.split('/').pop();
-        setVendeurId(vId);
-        try {
-          const response = await api.get(`/utilisateurs/${vId}`);
-          setVendeurEmail(response.data.email);
-        } catch (err) {
-          // Silencieux si non authentifié
+        // Récupérer les infos du vendeur UNIQUEMENT si connecté
+        if (pieceData.vendeur && user) {
+            const vId = pieceData.vendeur.split('/').pop();
+            setVendeurId(vId);
+            try {
+                const response = await api.get(`/utilisateurs/${vId}`);
+                setVendeurEmail(response.data.email);
+            } catch (err) {
+                // Silencieux
+            }
         }
+        setLoading(false);
+      } catch (err) {
+        console.error(err);
+        setError("Impossible de charger cette pièce.");
+        setLoading(false);
       }
-      setLoading(false);
-    } catch (err) {
-      console.error(err);
-      setError("Impossible de charger cette pièce.");
-      setLoading(false);
-    }
-  };
+    };
 
   useEffect(() => {
     fetchData();
-  }, [id]);
+  }, [id, user]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
