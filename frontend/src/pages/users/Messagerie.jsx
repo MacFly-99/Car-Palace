@@ -57,11 +57,6 @@ function Messagerie() {
     return () => clearInterval(interval);
   }, [userId]);
 
-  // Scroll automatique en bas
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
   const handleSend = async (e) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
