@@ -24,3 +24,5 @@ J'utilise un système de polling toutes les 10 secondes pour rafraîchir le comp
 Pour la partie test, j'ai désactivé l'audit de sécurité de Composer pour ce projet car certaines dépendances de développement (notamment celles utilisées par PHPUnit) déclenchent des alertes de sécurité non applicables à mon usage.
 
 J'ai écrit 17 tests unitaires avec PHPUnit couvrant les principales entités du domaine métier : Utilisateur (rôles), Piece (attributs, relations), Marque (relation avec Modèle), Categorie (relation avec Piece). Ces tests garantissent que la logique métier fonctionne correctement, indépendamment de la couche HTTP ou de la base de données.
+
+J'ai configuré une séparation stricte entre les variables d'environnement versionnées (.env) et les secrets locaux (.env.local, ignoré par Git). Cela évite toute fuite de credentials dans le dépôt public.

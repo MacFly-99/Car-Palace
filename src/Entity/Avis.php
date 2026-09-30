@@ -32,7 +32,7 @@ class Avis
     #[ORM\JoinColumn(nullable: false)]
     private ?Utilisateur $auteur = null;
 
-    #[ORM\ManyToOne(inversedBy: 'avis')]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?Piece $piece = null;
 
