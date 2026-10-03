@@ -1,3 +1,7 @@
+.git/
+.DS_Store
+*.log
+
 # Frontend React (déployé séparément sur Vercel)
 frontend/
 frontend/**
