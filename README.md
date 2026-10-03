@@ -16,6 +16,8 @@ J'ai choisi la 2ème solution (plus simple, suffisante pour mon projet).
 
 Mon application est complète : catalogue avec filtres, authentification JWT, CRUD complet sur les pièces, espace administrateur avec gestion des utilisateurs/pièces/commandes/avis, système d'avis public, et messagerie interne basée sur MongoDB pour démontrer ma maîtrise du SQL et du NoSQL.
 
+J'ai implémenté une barre de filtres intelligente qui se réduit automatiquement au scroll pour libérer de l'espace visuel sur le catalogue, tout en restant accessible. L'utilisateur peut la ré-étendre d'un simple clic sur la barre de recherche. Les filtres actifs sont signalés par un badge sur l'icône de recherche.
+
 J'ai créé un Document MongoDB Message avec les annotations ODM (#[MongoDB\Document]), équivalent d'une entité Doctrine pour une base NoSQL. Contrairement au SQL, MongoDB ne nécessite pas de schéma strict — les documents peuvent avoir des champs variables, ce qui est idéal pour une messagerie.
 
 J'ai ajouté un système de notification en temps quasi-réel qui interroge périodiquement l'API pour compter les messages non lus. Le badge s'affiche uniquement s'il y a au moins un message non lu, et disparaît dès que la conversation est consultée.

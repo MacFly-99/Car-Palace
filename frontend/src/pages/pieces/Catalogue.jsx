@@ -11,6 +11,8 @@ function Catalogue() {
   const [marques, setMarques] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isFiltersExpanded, setIsFiltersExpanded] = useState(true);
+  const [userOverride, setUserOverride] = useState(false);
 
   const [filters, setFilters] = useState({
     titre: urlSearch,
@@ -21,10 +23,35 @@ function Catalogue() {
     prixMax: '',
   });
 
-  // Synchroniser le filtre titre quand l'URL change (recherche depuis le Header)
+  // Synchroniser le filtre titre quand l'URL change
   useEffect(() => {
     setFilters((prev) => ({ ...prev, titre: urlSearch }));
   }, [urlSearch]);
+
+  // Effet de réduction de la barre de filtres au scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      // Si on remonte tout en haut, on réinitialise tout
+      if (window.scrollY < 50) {
+        setUserOverride(false);
+        setIsFiltersExpanded(true);
+        return;
+      }
+
+      // Si l'utilisateur a explicitement ouvert, on ne referme pas automatiquement
+      if (userOverride) return;
+
+      // Sinon on applique la logique de réduction au scroll
+      if (window.scrollY > 100) {
+        setIsFiltersExpanded(false);
+      } else {
+        setIsFiltersExpanded(true);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [userOverride]);
 
   // Chargement initial : pièces + marques + catégories
   useEffect(() => {
@@ -47,7 +74,7 @@ function Catalogue() {
     fetchData();
   }, []);
 
-  // Filtrage LOCAL (aucun appel API, ultra rapide)
+  // Filtrage LOCAL
   const filteredPieces = useMemo(() => {
     return allPieces.filter((piece) => {
       if (filters.titre) {
@@ -80,7 +107,6 @@ function Catalogue() {
 
   const activeFiltersCount = Object.values(filters).filter((v) => v !== '').length;
 
-  // Fonctions utilitaires pour les badges
   const getMarqueName = (iri) => marques.find((m) => `/api/marques/${m.id}` === iri)?.nom;
   const getCategorieName = (iri) => categories.find((c) => `/api/categories/${c.id}` === iri)?.nom;
 
@@ -94,7 +120,7 @@ function Catalogue() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* ========== SECTION HERO ========== */}
+      {/* SECTION HERO */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-16 px-6">
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
@@ -109,128 +135,153 @@ function Catalogue() {
         </div>
       </div>
 
-      {/* ========== BARRE DE RECHERCHE ET FILTRES ========== */}
+      {/* BARRE DE RECHERCHE ET FILTRES */}
       <div className="bg-white shadow-md sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto p-6">
-          {/* Recherche principale */}
-          <div className="mb-4">
+        <div className={`max-w-7xl mx-auto transition-all duration-300 ${
+          isFiltersExpanded ? 'p-6' : 'p-3'
+        }`}>
+          {/* Champ de recherche (cliquable pour étendre) */}
+          <div className={`relative transition-all duration-300 ${
+            isFiltersExpanded ? 'mb-4' : 'mb-0'
+          }`}>
             <input
               type="text"
               name="titre"
               value={filters.titre}
               onChange={handleChange}
+              onFocus={() => {
+                setIsFiltersExpanded(true);
+                setUserOverride(true);
+              }}
+              onClick={() => {
+                setIsFiltersExpanded(true);
+                setUserOverride(true);
+              }}
               placeholder="🔍 Rechercher une pièce (ex: plaquette, phare...)"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
+              className={`w-full px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${
+                isFiltersExpanded ? 'py-3 text-lg' : 'py-2 text-base'
+              }`}
             />
+            {!isFiltersExpanded && activeFiltersCount > 0 && (
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full">
+                {activeFiltersCount}
+              </span>
+            )}
           </div>
 
-          {/* Filtres avancés */}
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
-            <select
-              name="marque"
-              value={filters.marque}
-              onChange={handleChange}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            >
-              <option value="">Toutes les marques</option>
-              {marques.map((m) => (
-                <option key={m.id} value={`/api/marques/${m.id}`}>{m.nom}</option>
-              ))}
-            </select>
+          {/* Filtres (masquables) */}
+          <div
+            className={`transition-all duration-300 ease-in-out overflow-hidden ${
+              isFiltersExpanded ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0 mt-0'
+            }`}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
+              <select
+                name="marque"
+                value={filters.marque}
+                onChange={handleChange}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              >
+                <option value="">Toutes les marques</option>
+                {marques.map((m) => (
+                  <option key={m.id} value={`/api/marques/${m.id}`}>{m.nom}</option>
+                ))}
+              </select>
 
-            <select
-              name="categorie"
-              value={filters.categorie}
-              onChange={handleChange}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            >
-              <option value="">Toutes les catégories</option>
-              {categories.map((c) => (
-                <option key={c.id} value={`/api/categories/${c.id}`}>{c.nom}</option>
-              ))}
-            </select>
+              <select
+                name="categorie"
+                value={filters.categorie}
+                onChange={handleChange}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              >
+                <option value="">Toutes les catégories</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={`/api/categories/${c.id}`}>{c.nom}</option>
+                ))}
+              </select>
 
-            <select
-              name="etat"
-              value={filters.etat}
-              onChange={handleChange}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            >
-              <option value="">Tous les états</option>
-              <option value="Neuf">Neuf</option>
-              <option value="Très bon état">Très bon état</option>
-              <option value="Bon état">Bon état</option>
-              <option value="Usure normale">Usure normale</option>
-            </select>
+              <select
+                name="etat"
+                value={filters.etat}
+                onChange={handleChange}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              >
+                <option value="">Tous les états</option>
+                <option value="Neuf">Neuf</option>
+                <option value="Très bon état">Très bon état</option>
+                <option value="Bon état">Bon état</option>
+                <option value="Usure normale">Usure normale</option>
+              </select>
 
-            <input
-              type="number"
-              name="prixMin"
-              value={filters.prixMin}
-              onChange={handleChange}
-              placeholder="Prix min (€)"
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            />
+              <input
+                type="number"
+                name="prixMin"
+                value={filters.prixMin}
+                onChange={handleChange}
+                placeholder="Prix min (€)"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              />
 
-            <input
-              type="number"
-              name="prixMax"
-              value={filters.prixMax}
-              onChange={handleChange}
-              placeholder="Prix max (€)"
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            />
-          </div>
+              <input
+                type="number"
+                name="prixMax"
+                value={filters.prixMax}
+                onChange={handleChange}
+                placeholder="Prix max (€)"
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              />
+            </div>
 
-          {/* ========== BADGES FILTRES ACTIFS ========== */}
-          {activeFiltersCount > 0 && (
-            <div className="flex flex-wrap gap-2 mt-4">
-              {filters.titre && (
-                <span className="inline-flex items-center gap-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold">
-                  🔍 "{filters.titre}"
-                </span>
-              )}
-              {filters.marque && getMarqueName(filters.marque) && (
-                <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
-                  🏷️ {getMarqueName(filters.marque)}
-                </span>
-              )}
-              {filters.categorie && getCategorieName(filters.categorie) && (
-                <span className="inline-flex items-center gap-1 bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-xs font-semibold">
-                  📁 {getCategorieName(filters.categorie)}
-                </span>
-              )}
-              {filters.etat && (
-                <span className="inline-flex items-center gap-1 bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-semibold">
-                  ⭐ {filters.etat}
-                </span>
-              )}
-              {(filters.prixMin || filters.prixMax) && (
-                <span className="inline-flex items-center gap-1 bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-semibold">
-                  💰 {filters.prixMin || '0'} € - {filters.prixMax || '∞'} €
-                </span>
+            {/* Badges filtres actifs */}
+            {activeFiltersCount > 0 && (
+              <div className="flex flex-wrap gap-2 mt-4">
+                {filters.titre && (
+                  <span className="inline-flex items-center gap-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold">
+                    🔍 "{filters.titre}"
+                  </span>
+                )}
+                {filters.marque && getMarqueName(filters.marque) && (
+                  <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
+                    🏷️ {getMarqueName(filters.marque)}
+                  </span>
+                )}
+                {filters.categorie && getCategorieName(filters.categorie) && (
+                  <span className="inline-flex items-center gap-1 bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-xs font-semibold">
+                    📁 {getCategorieName(filters.categorie)}
+                  </span>
+                )}
+                {filters.etat && (
+                  <span className="inline-flex items-center gap-1 bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-semibold">
+                    ⭐ {filters.etat}
+                  </span>
+                )}
+                {(filters.prixMin || filters.prixMax) && (
+                  <span className="inline-flex items-center gap-1 bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-semibold">
+                    💰 {filters.prixMin || '0'} € - {filters.prixMax || '∞'} €
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* Résumé */}
+            <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
+              <span>
+                <strong>{filteredPieces.length}</strong> pièce{filteredPieces.length > 1 ? 's' : ''} trouvée{filteredPieces.length > 1 ? 's' : ''}
+              </span>
+              {activeFiltersCount > 0 && (
+                <button
+                  onClick={resetFilters}
+                  className="text-blue-600 hover:underline font-semibold"
+                >
+                  ✕ Réinitialiser les filtres ({activeFiltersCount})
+                </button>
               )}
             </div>
-          )}
-
-          {/* Résumé */}
-          <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
-            <span>
-              <strong>{filteredPieces.length}</strong> pièce{filteredPieces.length > 1 ? 's' : ''} trouvée{filteredPieces.length > 1 ? 's' : ''}
-            </span>
-            {activeFiltersCount > 0 && (
-              <button
-                onClick={resetFilters}
-                className="text-blue-600 hover:underline font-semibold"
-              >
-                ✕ Réinitialiser les filtres ({activeFiltersCount})
-              </button>
-            )}
           </div>
         </div>
       </div>
 
-      {/* ========== GRILLE DES PIÈCES ========== */}
+      {/* GRILLE DES PIÈCES */}
       <div className="p-8">
         <div className="max-w-7xl mx-auto">
           {filteredPieces.length === 0 ? (
