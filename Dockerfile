@@ -1,5 +1,7 @@
-# Dockerfile pour Car Palace Backend (Symfony + MongoDB)
+# Version 2 - Fix mongodb extension (rebuild sans cache)
+FROM php:8.2-apache
 
+# Dockerfile pour Car Palace Backend (Symfony + MongoDB)
 FROM php:8.2-apache
 
 # Installation des dépendances système + extensions PHP
@@ -46,7 +48,7 @@ WORKDIR /var/www/html
 COPY . .
 
 # Installation des dépendances Composer
-RUN composer install --no-dev --optimize-autoloader --no-scripts
+RUN composer install --no-dev --optimize-autoloader --no-scripts --ignore-platform-req=ext-mongodb
 
 # Génération des clés JWT + cache
 RUN php bin/console lexik:jwt:generate-keypair --skip-if-exists || true
