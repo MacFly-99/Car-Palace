@@ -27,7 +27,7 @@ RUN docker-php-ext-install \
     curl
 
 # Extension MongoDB via PECL
-RUN pecl install mongodb \
+RUN pecl install mongodb-1.21.0 \
     && docker-php-ext-enable mongodb
 
 # Installation de Composer
