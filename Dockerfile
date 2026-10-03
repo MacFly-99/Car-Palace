@@ -51,9 +51,10 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts
 RUN php bin/console lexik:jwt:generate-keypair --skip-if-exists || true
 RUN php bin/console cache:clear --env=prod --no-debug || true
 
-# Permissions
-RUN chown -R www-data:www-data /var/www/html/var /var/www/html/public /var/www/html/config
-
+# Création des dossiers nécessaires + permissions
+RUN mkdir -p /var/www/html/var/cache /var/www/html/var/log \
+    && chown -R www-data:www-data /var/www/html/var /var/www/html/public /var/www/html/config
+    
 # Exposition du port (Railway fournit $PORT)
 EXPOSE 80
 
