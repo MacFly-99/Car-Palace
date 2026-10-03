@@ -1,4 +1,4 @@
-# Version 2 - Fix mongodb extension (rebuild sans cache)
+# Version 4 - Alignement extension mongodb version locale
 FROM php:8.2-apache
 
 # Dockerfile pour Car Palace Backend (Symfony + MongoDB)
@@ -29,7 +29,7 @@ RUN docker-php-ext-install \
     curl
 
 # Extension MongoDB via PECL
-RUN pecl install mongodb-1.21.0 \
+RUN pecl install mongodb-1.21.10 \
     && docker-php-ext-enable mongodb
 
 # Installation de Composer
@@ -48,7 +48,7 @@ WORKDIR /var/www/html
 COPY . .
 
 # Installation des dépendances Composer
-RUN composer install --no-dev --optimize-autoloader --no-scripts --ignore-platform-req=ext-mongodb
+RUN composer install --no-dev --optimize-autoloader --no-scripts
 
 # Génération des clés JWT + cache
 RUN php bin/console lexik:jwt:generate-keypair --skip-if-exists || true
