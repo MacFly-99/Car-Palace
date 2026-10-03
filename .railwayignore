@@ -1,0 +1,19 @@
+# Frontend React (déployé séparément sur Vercel)
+frontend/
+frontend/**
+node_modules/
+
+# Dépendances back
+vendor/
+
+# Cache et logs
+var/cache/
+var/log/
+
+# Secrets
+.env.local
+config/jwt/*.pem
+
+# Fichiers de dev
+.phpunit.cache/
+.phpunit.result.cache
