@@ -1,6 +1,3 @@
-# Version 4 - Alignement extension mongodb version locale
-FROM php:8.2-apache
-
 # Dockerfile pour Car Palace Backend (Symfony + MongoDB)
 FROM php:8.2-apache
 
