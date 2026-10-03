@@ -1,5 +1,4 @@
 # Dockerfile pour Car Palace Backend (Symfony + MongoDB)
-
 FROM php:8.2-apache
 
 # Installation des dépendances système + extensions PHP
@@ -27,7 +26,7 @@ RUN docker-php-ext-install \
     curl
 
 # Extension MongoDB via PECL
-RUN pecl install mongodb \
+RUN pecl install mongodb-1.21.10 \
     && docker-php-ext-enable mongodb
 
 # Installation de Composer
