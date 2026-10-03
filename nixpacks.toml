@@ -12,12 +12,13 @@ nixPkgs = [
     "php82Extensions.iconv",
     "php82Extensions.sodium",
     "php82Extensions.intl",
-    "php82Extensions.fileinfo"
+    "php82Extensions.fileinfo",
+    "php82Extensions.mongodb"
 ]
 
 [phases.install]
 cmds = [
-    "composer install --no-dev --optimize-autoloader"
+    "composer install --no-dev --optimize-autoloader --no-scripts"
 ]
 
 [phases.build]
