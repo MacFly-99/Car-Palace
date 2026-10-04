@@ -59,5 +59,8 @@ RUN mkdir -p /var/www/html/var/cache /var/www/html/var/log
 # Génération des clés JWT
 RUN php bin/console lexik:jwt:generate-keypair --skip-if-exists || true
 
-# Démarrage
-CMD php -S 0.0.0.0:${PORT:-80} -t public
+# Vider le cache PROD (force la relecture des variables d'environnement au démarrage)
+RUN rm -rf /var/www/html/var/cache/prod
+
+# Démarrage avec cache:warmup (recalcule le cache avec les vraies variables)
+CMD php bin/console cache:warmup --env=prod && php -S 0.0.0.0:${PORT:-80} -t public
