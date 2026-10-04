@@ -1,5 +1,5 @@
 # Dockerfile pour Car Palace Backend (Symfony + MongoDB)
-# Version 7 - Utilisation de PHP CLI au lieu d'Apache (plus fiable)
+# Version 8 - composer install avec vendor forcé
 
 FROM php:8.2-cli
 
@@ -38,14 +38,16 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 COPY . .
 
-# Installation des dépendances Composer
-RUN composer install --no-dev --optimize-autoloader --no-scripts
+# 🚨 SUPPRESSION du vendor local s'il existe + réinstallation propre
+RUN rm -rf vendor/ var/cache/* var/log/* \
+    && composer install --no-dev --optimize-autoloader --no-scripts \
+    && ls -la vendor/ | head -10
 
-# Création des dossiers var/ + permissions
+# Création des dossiers var/
 RUN mkdir -p /var/www/html/var/cache /var/www/html/var/log
 
 # Génération des clés JWT
 RUN php bin/console lexik:jwt:generate-keypair --skip-if-exists || true
 
-# Démarrage avec le serveur PHP intégré sur le port Railway
+# Démarrage
 CMD php -S 0.0.0.0:${PORT:-80} -t public
