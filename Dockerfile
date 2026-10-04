@@ -1,5 +1,5 @@
 # Dockerfile pour Car Palace Backend (Symfony + MongoDB)
-# Version 8 - composer install avec vendor forcé
+# Version 9 - Fix autoload_runtime.php manquant
 
 FROM php:8.2-cli
 
@@ -38,10 +38,16 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 COPY . .
 
-# 🚨 SUPPRESSION du vendor local s'il existe + réinstallation propre
+# 🚨 INSTALL COMPOSER SANS --no-scripts (pour générer autoload_runtime.php)
 RUN rm -rf vendor/ var/cache/* var/log/* \
-    && composer install --no-dev --optimize-autoloader --no-scripts \
-    && ls -la vendor/ | head -10
+    && composer install --no-dev --optimize-autoloader
+
+# 🔍 VÉRIFICATION : le fichier autoload_runtime.php doit exister
+RUN ls -la /var/www/html/vendor/autoload_runtime.php || (echo "❌ FICHIER MANQUANT" && exit 1)
+
+# 🔍 VÉRIFICATION : les autres fichiers clés
+RUN ls -la /var/www/html/vendor/autoload.php
+RUN ls -la /var/www/html/vendor/symfony/runtime/ || true
 
 # Création des dossiers var/
 RUN mkdir -p /var/www/html/var/cache /var/www/html/var/log
