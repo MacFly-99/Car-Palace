@@ -1,4 +1,5 @@
-# Dockerfile pour Car Palace Backend (Symfony 7 + MongoDB + MySQL)
+# Dockerfile pour Car Palace Backend (Symfony 7 + MySQL + MongoDB)
+# Configuration testée et validée
 
 FROM php:8.2-cli
 
@@ -15,10 +16,9 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Extensions PHP natives
+# 2. Extensions PHP natives (MySQL uniquement, pas de PostgreSQL)
 RUN docker-php-ext-install \
     pdo \
-    pdo_pgsql \
     pdo_mysql \
     mbstring \
     intl \
@@ -40,7 +40,7 @@ ENV COMPOSER_HOME=/composer
 WORKDIR /var/www/html
 COPY . .
 
-# 6. Installation des dépendances SANS SCRIPTS
+# 6. Installation des dépendances SANS SCRIPTS (pour éviter cache:clear au build)
 RUN composer install --optimize-autoloader --no-interaction --no-scripts
 
 # 7. Dossiers var/
