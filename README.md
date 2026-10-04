@@ -28,3 +28,13 @@ Pour la partie test, j'ai désactivé l'audit de sécurité de Composer pour ce 
 J'ai écrit 17 tests unitaires avec PHPUnit couvrant les principales entités du domaine métier : Utilisateur (rôles), Piece (attributs, relations), Marque (relation avec Modèle), Categorie (relation avec Piece). Ces tests garantissent que la logique métier fonctionne correctement, indépendamment de la couche HTTP ou de la base de données.
 
 J'ai configuré une séparation stricte entre les variables d'environnement versionnées (.env) et les secrets locaux (.env.local, ignoré par Git). Cela évite toute fuite de credentials dans le dépôt public.
+
+Lors du déploiement sur Railway, j'ai rencontré un problème classique : les dossiers var/ de Symfony sont exclus du versioning (gitignorés), ce qui faisait échouer la commande de permissions du Dockerfile. J'ai résolu en créant explicitement ces dossiers dans le Dockerfile avant d'appliquer les permissions.
+
+J'ai rencontré un conflit de modules Apache (MPM) lors du déploiement Docker : deux modules multi-processus étaient chargés simultanément. J'ai résolu en désactivant explicitement les MPM concurrents via a2dismod dans le Dockerfile, en ne gardant que mpm_prefork, qui est le MPM recommandé pour PHP avec mod_php.
+
+Le déploiement sur Railway utilise le serveur PHP intégré (via le mode CLI de PHP) au lieu d'Apache, car ce dernier présentait un conflit de modules MPM dans l'environnement Docker. En production réelle sur un hébergeur mutualisé (OVH, o2switch), j'utiliserais Apache ou Nginx avec les configurations adaptées.
+
+Lors du déploiement Docker, j'ai dû retirer l'option --no-scripts de la commande composer install, car Symfony Runtime a besoin d'exécuter un script post-install pour générer autoload_runtime.php. Sans ce fichier, l'application ne démarre pas.
+
+Le déploiement Docker de Symfony m'a demandé d'adapter la configuration : les scripts post-install de Composer (Symfony Flex) ne fonctionnaient pas dans un contexte root sans l'utilitaire symfony-cmd. J'ai désactivé ces scripts automatiques et les ai remplacés par des commandes PHP directes dans le Dockerfile.

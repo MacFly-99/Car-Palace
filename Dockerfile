@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install -y \
 # 2. Extensions PHP natives
 RUN docker-php-ext-install \
     pdo \
+    pdo_pgsql \
     pdo_mysql \
     mbstring \
     intl \
@@ -39,21 +40,14 @@ ENV COMPOSER_HOME=/composer
 WORKDIR /var/www/html
 COPY . .
 
-# 6. Installation des dépendances (avec dev pour Fixtures)
-RUN composer install --optimize-autoloader --no-interaction
+# 6. Installation des dépendances SANS SCRIPTS
+RUN composer install --optimize-autoloader --no-interaction --no-scripts
 
-# 7. Scripts Symfony (cache, assets)
-RUN php bin/console cache:clear --env=prod --no-debug || true \
-    && php bin/console assets:install public --env=prod || true
-
-# 8. Dossiers var/
+# 7. Dossiers var/
 RUN mkdir -p /var/www/html/var/cache /var/www/html/var/log
 
-# 9. Génération des clés JWT
-RUN php bin/console lexik:jwt:generate-keypair --skip-if-exists || true
-
-# 10. Port d'écoute
+# 8. Port d'écoute
 EXPOSE 10000
 
-# 11. Démarrage
+# 9. Démarrage
 CMD php -S 0.0.0.0:${PORT:-10000} -t public
