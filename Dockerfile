@@ -45,7 +45,7 @@ COPY . .
 # 🚨 Installation avec autorisation root + plugins actifs
 RUN rm -rf vendor/ var/cache/* var/log/* \
     && composer install --no-dev --optimize-autoloader --no-interaction
-
+    
 # 🔍 Vérification
 RUN ls -la /var/www/html/vendor/autoload_runtime.php
 
