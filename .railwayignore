@@ -7,9 +7,6 @@ frontend/
 frontend/**
 node_modules/
 
-# Dépendances back
-vendor/
-
 # Cache et logs
 var/cache/
 var/log/
