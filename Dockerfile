@@ -1,5 +1,5 @@
 # Dockerfile pour Car Palace Backend (Symfony + MongoDB)
-# Version 10 - Fix symfony-cmd + root + plugins
+# Version 11 - Config finale propre
 
 FROM php:8.2-cli
 
@@ -34,7 +34,7 @@ RUN pecl install mongodb-1.21.10 \
 # Installation de Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# 🔑 Variables d'environnement pour autoriser root + plugins
+# 🔑 Autoriser Composer en root (indispensable dans Docker)
 ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV COMPOSER_HOME=/composer
 
@@ -42,11 +42,15 @@ ENV COMPOSER_HOME=/composer
 WORKDIR /var/www/html
 COPY . .
 
-# 🚨 Installation avec autorisation root + plugins actifs
+# 🚨 Installation des dépendances SANS scripts (on les exécute après)
 RUN rm -rf vendor/ var/cache/* var/log/* \
-    && composer install --no-dev --optimize-autoloader --no-interaction
-    
-# 🔍 Vérification
+    && composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+
+# 🔑 EXÉCUTION MANUELLE DES SCRIPTS (remplace symfony-cmd)
+RUN php bin/console cache:clear --env=prod --no-debug || true \
+    && php bin/console assets:install public --env=prod || true
+
+# 🔍 Vérification que autoload_runtime existe
 RUN ls -la /var/www/html/vendor/autoload_runtime.php
 
 # Création des dossiers var/
