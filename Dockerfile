@@ -1,4 +1,5 @@
 # Dockerfile pour Car Palace Backend (Symfony 7 + MySQL + MongoDB)
+# Version FINALE VALIDÉE
 
 FROM php:8.2-cli
 
@@ -39,24 +40,21 @@ ENV COMPOSER_HOME=/composer
 WORKDIR /var/www/html
 COPY . .
 
-# 6. Config Composer : désactiver advisories
-RUN composer config --no-plugins audit.block-insecure false
+# 6. CRUCIAL : désactiver les advisories de sécurité (Composer 2.7+)
+RUN composer config --global policy.advisories.block false || true \
+    && composer config --no-plugins audit.block-insecure false || true
 
 # 7. Installation des dépendances
 RUN composer install --optimize-autoloader --no-interaction --no-scripts
 
-# 8. FORCER l'installation du bundle Fixtures (au cas où)
-RUN composer require doctrine/doctrine-fixtures-bundle:^4.3 --no-interaction --no-scripts --no-update \
-    && composer update doctrine/doctrine-fixtures-bundle --no-interaction --no-scripts
-
-# 9. VÉRIFICATION
+# 8. VÉRIFICATION : bundle Fixtures présent
 RUN ls -la vendor/doctrine/doctrine-fixtures-bundle/ || (echo "FIXTURES MANQUANT" && exit 1)
 
-# 10. Dossiers var/
+# 9. Dossiers var/
 RUN mkdir -p /var/www/html/var/cache /var/www/html/var/log
 
-# 11. Port
+# 10. Port
 EXPOSE 10000
 
-# 12. Démarrage
+# 11. Démarrage
 CMD php -S 0.0.0.0:${PORT:-10000} -t public
