@@ -1,9 +1,8 @@
-# Dockerfile pour Car Palace Backend (Symfony + MongoDB)
-# Version FINALE - Regénération composer.lock + tout en un
+# Dockerfile pour Car Palace Backend (Symfony 7 + MySQL + MongoDB)
 
 FROM php:8.2-cli
 
-# Installation des dépendances système
+# 1. Installation des dépendances système
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
@@ -16,7 +15,7 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
-# Extensions PHP natives
+# 2. Extensions PHP natives
 RUN docker-php-ext-install \
     pdo \
     pdo_mysql \
@@ -27,43 +26,37 @@ RUN docker-php-ext-install \
     xml \
     curl
 
-# Extension MongoDB
+# 3. Extension MongoDB
 RUN pecl install mongodb-1.21.10 \
     && docker-php-ext-enable mongodb
 
-# Installation de Composer
+# 4. Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
-# Autoriser Composer en root + désactiver les advisories
 ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV COMPOSER_HOME=/composer
 
-# Copie du projet
+# 5. Copie du projet
 WORKDIR /var/www/html
 COPY . .
 
-# 🚨 INSTALLATION COMPLÈTE SANS CONTRAINTE DE LOCK NI ADVISORY
-RUN rm -rf vendor/ var/cache/* var/log/* composer.lock \
-    && composer config --no-plugins allow-plugins.symfony/flex true \
-    && composer config --no-plugins allow-plugins.symfony/runtime true \
-    && composer config --no-plugins audit.block-insecure false \
-    && composer update --optimize-autoloader --no-interaction --no-scripts --no-dev
+# 6. Config Composer : désactiver advisories
+RUN composer config --no-plugins audit.block-insecure false
 
-# 🔍 VÉRIFICATION 1 : bundle fixtures présent
-RUN ls -la /var/www/html/vendor/doctrine/doctrine-fixtures-bundle/ || (echo "❌ FIXTURES MANQUANT" && exit 1)
+# 7. Installation des dépendances
+RUN composer install --optimize-autoloader --no-interaction --no-scripts
 
-# 🔍 VÉRIFICATION 2 : symfony/runtime présent
-RUN ls -la /var/www/html/vendor/symfony/runtime/ || (echo "❌ RUNTIME MANQUANT" && exit 1)
+# 8. FORCER l'installation du bundle Fixtures (au cas où)
+RUN composer require doctrine/doctrine-fixtures-bundle:^4.3 --no-interaction --no-scripts --no-update \
+    && composer update doctrine/doctrine-fixtures-bundle --no-interaction --no-scripts
 
-# Exécution manuelle des scripts Symfony
-RUN php bin/console cache:clear --env=prod --no-debug || true \
-    && php bin/console assets:install public --env=prod || true
+# 9. VÉRIFICATION
+RUN ls -la vendor/doctrine/doctrine-fixtures-bundle/ || (echo "FIXTURES MANQUANT" && exit 1)
 
-# Création des dossiers var/
+# 10. Dossiers var/
 RUN mkdir -p /var/www/html/var/cache /var/www/html/var/log
 
-# Génération des clés JWT
-RUN php bin/console lexik:jwt:generate-keypair --skip-if-exists || true
+# 11. Port
+EXPOSE 10000
 
-# Démarrage
-CMD php -S 0.0.0.0:${PORT:-80} -t public
+# 12. Démarrage
+CMD php -S 0.0.0.0:${PORT:-10000} -t public
