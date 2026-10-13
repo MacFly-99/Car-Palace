@@ -1,0 +1,10 @@
+.git
+.gitignore
+frontend
+node_modules
+vendor
+var
+tests
+.env.local
+.env.*.local
+config/jwt/*.pem
