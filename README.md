@@ -29,4 +29,30 @@ J'ai écrit 17 tests unitaires avec PHPUnit couvrant les principales entités du
 
 J'ai configuré une séparation stricte entre les variables d'environnement versionnées (.env) et les secrets locaux (.env.local, ignoré par Git). Cela évite toute fuite de credentials dans le dépôt public.
 
-J'ai utilisé deux approches de déploiement : d'abord une tentative sur Render qui a rencontré plusieurs obstacles techniques (extensions PHP, advisories Composer, bundles conditionnels), puis une migration vers [la plateforme finale] qui a permis un déploiement propre en [X] minutes
+J'ai utilisé plusieurs approches de déploiement : d'abord une tentative sur Railway qui a rencontré plusieurs obstacles techniques (extensions PHP, advisories Composer, bundles conditionnels), puis une migration vers Aiven qui a permis un déploiement propre en beaucoup moins de temps.
+
+Aiven au lieu de Railway pour MySQL car Aiven propose MySQL managé avec SSL natif. Plus stable que Railway qui a eu des problèmes de connexion publique/interne. De plus, le fichier config/certs/aiven-ca.pem force la connexion SSL ce qui offre une sécurité renforcée.
+
+
+Pour faire le deploiement de la base de donnees je suis passe par la creation de plusieurs fichiers :
+
+1. Dockerfile : c'est le plan de construction du conteneur backend Symfony : 
+- il définit l'environnement (PHP 8.2 + extensions,etc...).
+- il installe Composer puis lance composer install (avec les bonnes options).
+- il copie le code source dans /var/www/html.
+- il configure Apache (activation du module rewrite, vhost dédié).
+- il expose le port imposé par Render.
+- il définit la commande de démarrage (CMD ou via l'entrypoint).
+Rôle clé : c'est la recette qui transforme le code en image Docker prête à tourner.
+
+2. config/packages/doctrine_ssl.php : c'est LA solution élégante : un fichier PHP de config Doctrine qui injecte les options SSL directement. On configure SSL côté code.
+
+3. docker/entrypoint.sh : un script qui s'exécute au démarrage du conteneur. Il fait migrations + fixtures + démarrage Apache.Beaucoup plus fiable que d'essayer de tout faire dans le Dockerfile.
+
+4. docker/vhost.conf : une config Apache dédiée (au lieu du serveur PHP intégré). Point d'entrée public/ propre, meilleure gestion des routes Symfony.
+
+5. render.yaml : un fichier d'infrastructure-as-code pour Render. Permet de redéployer facilement avec la même config.
+
+6. frontend/vercel.json : config spécifique pour le frontend sur Vercel. Pour gérer les rewrites SPA (React Router) et les headers.
+
+7. .dockerignore : exclusion des fichiers inutiles
