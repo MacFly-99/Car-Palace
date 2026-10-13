@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: car-palace-api
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: APP_ENV
+        value: prod
+      - key: APP_DEBUG
+        value: "0"
+      - key: APP_SECRET
+        generateValue: true
+      - key: DEFAULT_URI
+        value: https://car-palace-api.onrender.com
+      - key: DATABASE_URL
+        sync: false
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DB
+        value: car_palace
+      - key: JWT_SECRET_KEY
+        value: /var/www/html/config/jwt/private.pem
+      - key: JWT_PUBLIC_KEY
+        value: /var/www/html/config/jwt/public.pem
+      - key: JWT_PASSPHRASE
+        generateValue: true
+      - key: CORS_ALLOW_ORIGIN
+        sync: false
+      - key: DB_SSL_CA
+        value: /var/www/html/config/certs/aiven-ca.pem
