@@ -22,7 +22,7 @@ COPY docker/vhost.conf /etc/apache2/sites-available/000-default.conf
 WORKDIR /var/www/html
 
 COPY composer.json composer.lock symfony.lock ./
-RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction --no-security-blocking
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction --no-audit
 
 COPY . .
 RUN composer dump-autoload --optimize --classmap-authoritative --no-dev --no-scripts \
