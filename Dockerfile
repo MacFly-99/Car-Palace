@@ -6,12 +6,15 @@ ENV APP_ENV=prod \
     COMPOSER_ALLOW_SUPERUSER=1 \
     PORT=10000
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        git unzip libicu-dev libzip-dev libssl-dev pkg-config \
-    && docker-php-ext-install -j"$(nproc)" intl pdo_mysql zip opcache \
-    && pecl install mongodb-1.21.0 \
-    && a2enmod rewrite headers \
-    && rm -rf /var/lib/apt/lists/* /tmp/pear
+RUN apt-get update && apt-get install -y --no-install-recommends git unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+RUN install-php-extensions intl pdo_mysql zip opcache mongodb-1.21.0 \
+    && a2enmod rewrite headers
+
+# Vérification : le build s'arrête ici avec un message clair si mongodb manque
+RUN php -m | grep -i mongodb
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
