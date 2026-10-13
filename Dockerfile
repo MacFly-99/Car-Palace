@@ -9,8 +9,7 @@ ENV APP_ENV=prod \
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git unzip libicu-dev libzip-dev libssl-dev pkg-config \
     && docker-php-ext-install -j"$(nproc)" intl pdo_mysql zip opcache \
-    && pecl install mongodb \
-    && docker-php-ext-enable mongodb \
+    && pecl install mongodb-1.21.0 \
     && a2enmod rewrite headers \
     && rm -rf /var/lib/apt/lists/* /tmp/pear
 
