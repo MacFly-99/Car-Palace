@@ -1,0 +1,7 @@
+framework:
+    rate_limiter:
+        api_register:
+            policy: 'sliding_window'
+            limit: 10
+            interval: '1 hour'
+            lock_factory: null
