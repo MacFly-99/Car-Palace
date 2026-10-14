@@ -20,6 +20,10 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 RUN sed -i 's/Listen 80$/Listen ${PORT}/' /etc/apache2/ports.conf
 COPY docker/vhost.conf /etc/apache2/sites-available/000-default.conf
+COPY docker/security.conf /etc/apache2/conf-available/zz-security.conf
+COPY docker/php-security.ini /usr/local/etc/php/conf.d/zz-security.ini
+RUN sed -i 's/\r$//' /etc/apache2/conf-available/zz-security.conf /usr/local/etc/php/conf.d/zz-security.ini \
+    && a2enconf zz-security
 
 WORKDIR /var/www/html
 
