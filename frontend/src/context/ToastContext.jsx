@@ -8,7 +8,10 @@ export const ToastProvider = ({ children }) => {
 
   const addToast = useCallback((message, type = 'success') => {
     const id = Date.now();
-    setToasts((prev) => [...prev, { id, message, type }]);
+        setToasts((prev) => {
+          if (prev.some((t) => t.message === message && t.type === type)) return prev;
+          return [...prev, { id, message, type }];
+        });
 
     // Auto-disparition après 3.5 secondes
     setTimeout(() => {
