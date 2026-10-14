@@ -22,13 +22,23 @@ function Login() {
       await login(email, password);
       addToast(`Bienvenue ${email} !`, 'success');
       navigate('/');
-    } catch (err) {
-      console.error("Erreur de connexion :", err);
-      addToast('Email ou mot de passe incorrect.', 'error');
-      setError("Email ou mot de passe incorrect.");
-    } finally {
-      setLoading(false);
-    }
+      } catch (err) {
+        console.error("Erreur de connexion :", err);
+        
+        const serverMessage = err.response?.data?.message || '';
+        let message = 'Email ou mot de passe incorrect.';
+        
+        if (serverMessage.includes('Too many failed login attempts')) {
+          message = 'Trop de tentatives de connexion. Réessayez dans 15 minutes.';
+        } else if (!err.response) {
+          message = 'Impossible de joindre le serveur. Réessayez dans quelques instants.';
+        }
+        
+        addToast(message, 'error');
+        setError(message);
+      } finally {
+        setLoading(false);
+      }
   };
 
   return (
