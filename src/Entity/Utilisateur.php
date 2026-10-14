@@ -18,7 +18,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
     // pour forcer le passage par notre contrôleur d'inscription
     operations: [
         new \ApiPlatform\Metadata\Get(),
-        new \ApiPlatform\Metadata\GetCollection(),
+        new \ApiPlatform\Metadata\GetCollection(security: "is_granted('ROLE_ADMIN')"),
     ]
 )]
 
