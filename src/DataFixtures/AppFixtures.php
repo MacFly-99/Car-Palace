@@ -28,6 +28,12 @@ class AppFixtures extends Fixture
     public function load(ObjectManager $manager): void
     {
         $faker = Factory::create('fr_FR');
+        $adminPassword = getenv('FIXTURE_ADMIN_PASSWORD') ?: ($_SERVER['FIXTURE_ADMIN_PASSWORD'] ?? null);
+        $userPassword = getenv('FIXTURE_USER_PASSWORD') ?: ($_SERVER['FIXTURE_USER_PASSWORD'] ?? null);
+
+        if (!$adminPassword || !$userPassword) {
+            throw new \RuntimeException('Définis FIXTURE_ADMIN_PASSWORD et FIXTURE_USER_PASSWORD avant de charger les fixtures.');
+        }
 
         // ============ 1. UTILISATEURS ============
         $users = [];
@@ -41,7 +47,7 @@ class AppFixtures extends Fixture
         $admin->setVille('Paris');
         $admin->setAdresse('1 rue de la Paix');
         $admin->setDateInscription(new \DateTime());
-        $admin->setPassword($this->passwordHasher->hashPassword($admin, 'password123'));
+        $admin->setPassword($this->passwordHasher->hashPassword($admin, $adminPassword));
         $manager->persist($admin);
         $users[] = $admin;
 
@@ -55,11 +61,11 @@ class AppFixtures extends Fixture
             $user->setVille($faker->city());
             $user->setAdresse($faker->streetAddress());
             $user->setDateInscription(new \DateTime());
-            $user->setPassword($this->passwordHasher->hashPassword($user, 'password123'));
+            $user->setPassword($this->passwordHasher->hashPassword($user, $userPassword));
             $manager->persist($user);
             $users[] = $user;
         }
-
+        
         // ============ 2. MARQUES ET MODÈLES ============
         $marquesData = [
             'Renault' => ['Clio', 'Megane'],
