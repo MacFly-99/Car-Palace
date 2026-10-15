@@ -48,9 +48,11 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['user:read'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['user:read'])]
     private ?string $prenom = null;
 
     #[ORM\Column(length: 255, nullable: true)]

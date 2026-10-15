@@ -81,15 +81,17 @@ function Messagerie() {
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-3xl mx-auto">
-        <Link to="/" className="text-blue-600 hover:underline mb-6 inline-block">
-          &larr; Retour au catalogue
+        <Link to="/mes-messages" className="text-blue-600 hover:underline mb-6 inline-block">
+        &larr; Retour à mes messages
         </Link>
 
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
           {/* Header */}
           <div className="bg-blue-600 text-white p-4">
             <h1 className="text-xl font-bold">
-              💬 Conversation avec {otherUser?.email || 'Utilisateur'}
+              💬 Conversation avec {otherUser?.prenom && otherUser?.nom 
+              ? `${otherUser.prenom} ${otherUser.nom}` 
+              : otherUser?.email || 'Utilisateur'}
             </h1>
           </div>
 

@@ -24,11 +24,13 @@ function MesMessages() {
       allMessages.forEach((msg) => {
         const otherUserId = msg.isMine ? msg.destinataireId : msg.expediteurId;
         const otherEmail = msg.isMine ? msg.destinataireEmail : msg.expediteurEmail;
-
+        const otherNom = msg.isMine ? msg.destinataireNom : msg.expediteurNom;
+        
         if (!conversationsMap[otherUserId]) {
           conversationsMap[otherUserId] = {
             otherUserId,
             otherEmail,
+            otherNom,
             lastMessage: msg,
             unreadCount: 0,
             totalMessages: 0,
@@ -99,7 +101,7 @@ function MesMessages() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <h2 className="text-lg font-bold text-gray-800">
-                          {conv.otherEmail || `Utilisateur #${conv.otherUserId}`}
+                          {conv.otherNom || conv.otherEmail || `Utilisateur #${conv.otherUserId}`}
                         </h2>
                         {conv.unreadCount > 0 && (
                           <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
