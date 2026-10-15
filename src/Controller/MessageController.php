@@ -169,16 +169,21 @@ class MessageController extends AbstractController
     {
         $data = [];
         foreach ($messages as $msg) {
-            // Récupérer l'email des autres utilisateurs (SQL)
             $expediteur = $em->getRepository(Utilisateur::class)->find($msg->getExpediteurId());
             $destinataire = $em->getRepository(Utilisateur::class)->find($msg->getDestinataireId());
-
+            
+            // Construction du nom complet (Prénom Nom)
+            $expediteurNom = $expediteur ? trim(($expediteur->getPrenom() ?? '') . ' ' . ($expediteur->getNom() ?? '')) : null;
+            $destinataireNom = $destinataire ? trim(($destinataire->getPrenom() ?? '') . ' ' . ($destinataire->getNom() ?? '')) : null;
+            
             $data[] = [
                 'id' => $msg->getId(),
                 'expediteurId' => $msg->getExpediteurId(),
                 'expediteurEmail' => $expediteur?->getEmail(),
+                'expediteurNom' => $expediteurNom ?: $expediteur?->getEmail(),
                 'destinataireId' => $msg->getDestinataireId(),
                 'destinataireEmail' => $destinataire?->getEmail(),
+                'destinataireNom' => $destinataireNom ?: $destinataire?->getEmail(),
                 'pieceId' => $msg->getPieceId(),
                 'contenu' => $msg->getContenu(),
                 'dateEnvoi' => $msg->getDateEnvoi()->format('Y-m-d H:i:s'),
