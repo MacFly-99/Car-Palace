@@ -1,58 +1,335 @@
-En développement, j'utilise symfony server:start --no-tls pour éviter les problèmes de certificats auto-signés. En production, le serveur sera protégé par un vrai certificat SSL fourni par l'hébergeur ou Let's Encrypt.
+════════════════════════════════════════════════════════════════════
+🚗 CAR PALACE
+════════════════════════════════════════════════════════════════════
 
-Dans la partie frontend, on trouve le dossier pages/ pour les différentes pages de l'application, services/ pour les appels API, context/ pour les Contextes React, et components/ pour les composants réutilisables.
+Plateforme d'achat et de revente de pièces détachées automobiles
+entre particuliers.
 
-J'ai réorganisé mon dossier pages/ en sous-modules : admin/ pour l'espace d'administration, auth/ pour l'authentification, pieces/ pour tout ce qui touche aux pièces, et users/ pour l'espace personnel de l'utilisateur. Cette séparation par domaine métier facilite la navigation et la maintenance.
-
-Pour le fichier de routing "App.jsx", j'ai organisé les imports et les routes par domaine métier avec des commentaires de section. Cela permet de naviguer rapidement dans le code et de comprendre l'architecture de l'application en un coup d'œil.
-
-Le tableau de bord administrateur offre une vue agrégée du chiffre d'affaires. En cliquant dessus, un modal affiche la répartition par statut de commande sous forme de barres de progression, calculée dynamiquement à partir des données retournées par l'API Symfony.
-
-Quand on utilise inversedBy dans Doctrine, la propriété inverse DOIT exister dans l'entité cible. Sinon, ça génère des erreurs de sérialisation.
-Pour éviter ce genre de problème, on peut :
-- soit déclarer les deux côtés de la relation (avec $ligneCommandes dans Piece).
-- soit utiliser une relation unidirectionnelle (juste ManyToOne sans inversedBy).
-J'ai choisi la 2ème solution (plus simple, suffisante pour mon projet).
-
-Mon application est complète : catalogue avec filtres, authentification JWT, CRUD complet sur les pièces, espace administrateur avec gestion des utilisateurs/pièces/commandes/avis, système d'avis public, et messagerie interne basée sur MongoDB pour démontrer ma maîtrise du SQL et du NoSQL.
-
-J'ai implémenté une barre de filtres intelligente qui se réduit automatiquement au scroll pour libérer de l'espace visuel sur le catalogue, tout en restant accessible. L'utilisateur peut la ré-étendre d'un simple clic sur la barre de recherche. Les filtres actifs sont signalés par un badge sur l'icône de recherche.
-
-J'ai créé un Document MongoDB Message avec les annotations ODM (#[MongoDB\Document]), équivalent d'une entité Doctrine pour une base NoSQL. Contrairement au SQL, MongoDB ne nécessite pas de schéma strict — les documents peuvent avoir des champs variables, ce qui est idéal pour une messagerie.
-
-J'ai ajouté un système de notification en temps quasi-réel qui interroge périodiquement l'API pour compter les messages non lus. Le badge s'affiche uniquement s'il y a au moins un message non lu, et disparaît dès que la conversation est consultée.
-J'utilise un système de polling toutes les 10 secondes pour rafraîchir le compteur de messages non lus. C'est un compromis entre réactivité et charge serveur. En production, je remplacerais ce système par Mercure (WebSocket) qui permet du vrai temps réel sans polling.
-
-Pour la partie test, j'ai désactivé l'audit de sécurité de Composer pour ce projet car certaines dépendances de développement (notamment celles utilisées par PHPUnit) déclenchent des alertes de sécurité non applicables à mon usage.
-
-J'ai écrit 17 tests unitaires avec PHPUnit couvrant les principales entités du domaine métier : Utilisateur (rôles), Piece (attributs, relations), Marque (relation avec Modèle), Categorie (relation avec Piece). Ces tests garantissent que la logique métier fonctionne correctement, indépendamment de la couche HTTP ou de la base de données.
-
-J'ai configuré une séparation stricte entre les variables d'environnement versionnées (.env) et les secrets locaux (.env.local, ignoré par Git). Cela évite toute fuite de credentials dans le dépôt public.
-
-J'ai utilisé plusieurs approches de déploiement : d'abord une tentative sur Railway qui a rencontré plusieurs obstacles techniques (extensions PHP, advisories Composer, bundles conditionnels), puis une migration vers Aiven qui a permis un déploiement propre en beaucoup moins de temps.
-
-Aiven au lieu de Railway pour MySQL car Aiven propose MySQL managé avec SSL natif. Plus stable que Railway qui a eu des problèmes de connexion publique/interne. De plus, le fichier config/certs/aiven-ca.pem force la connexion SSL ce qui offre une sécurité renforcée.
+🎓 Projet de fin de formation DWWM (Titre Professionnel Développeur
+   Web et Web Mobile) — Session 2026.
 
 
-Pour faire le deploiement de la base de donnees je suis passe par la creation de plusieurs fichiers :
+────────────────────────────────────────────────────────────────────
+📋 SOMMAIRE
+────────────────────────────────────────────────────────────────────
 
-1. Dockerfile : c'est le plan de construction du conteneur backend Symfony : 
-- il définit l'environnement (PHP 8.2 + extensions,etc...).
-- il installe Composer puis lance composer install (avec les bonnes options).
-- il copie le code source dans /var/www/html.
-- il configure Apache (activation du module rewrite, vhost dédié).
-- il expose le port imposé par Render.
-- il définit la commande de démarrage (CMD ou via l'entrypoint).
-Rôle clé : c'est la recette qui transforme le code en image Docker prête à tourner.
+1. 🎯 Présentation
+2. ✨ Fonctionnalités
+3. 🛠️ Stack technique
+4. 🏗️ Architecture
+5. 🚀 Installation locale
+6. 🌐 Déploiement
+7. 🧪 Tests
+8. 🔒 Sécurité
+9. 📁 Structure du projet
+10. 👤 Auteur
 
-2. config/packages/doctrine_ssl.php : c'est LA solution élégante : un fichier PHP de config Doctrine qui injecte les options SSL directement. On configure SSL côté code.
 
-3. docker/entrypoint.sh : un script qui s'exécute au démarrage du conteneur. Il fait migrations + fixtures + démarrage Apache.Beaucoup plus fiable que d'essayer de tout faire dans le Dockerfile.
+════════════════════════════════════════════════════════════════════
+🎯 1. PRÉSENTATION
+════════════════════════════════════════════════════════════════════
 
-4. docker/vhost.conf : une config Apache dédiée (au lieu du serveur PHP intégré). Point d'entrée public/ propre, meilleure gestion des routes Symfony.
+Car Palace est une plateforme web permettant l'achat et la revente
+de pièces détachées automobiles entre particuliers.
 
-5. render.yaml : un fichier d'infrastructure-as-code pour Render. Permet de redéployer facilement avec la même config.
+Elle a été développée dans le cadre du Titre Professionnel
+Développeur Web et Web Mobile (DWWM) avec pour objectifs :
 
-6. frontend/vercel.json : config spécifique pour le frontend sur Vercel. Pour gérer les rewrites SPA (React Router) et les headers.
+  ✅ Mettre en œuvre une architecture full-stack découplée
+     (API REST + SPA).
 
-7. .dockerignore : exclusion des fichiers inutiles
+  ✅ Démontrer la maîtrise conjointe de bases de données
+     SQL et NoSQL.
+
+  ✅ Assurer une sécurité de niveau production (JWT, rate
+     limiting, security headers, SSL).
+
+
+════════════════════════════════════════════════════════════════════
+✨ 2. FONCTIONNALITÉS
+════════════════════════════════════════════════════════════════════
+
+👤 Visiteur (non authentifié)
+─────────────────────────────
+  • Consulter le catalogue de pièces
+  • Rechercher une pièce par mots-clés
+  • Filtrer par marque, catégorie, état et prix
+  • Consulter la fiche détaillée d'une pièce et ses avis
+
+👥 Utilisateur connecté (ROLE_USER)
+───────────────────────────────────
+  • Toutes les fonctionnalités du visiteur
+  • Publier, modifier et supprimer ses annonces
+  • Contacter un vendeur via une messagerie interne
+  • Laisser un avis (note 5 étoiles + titre + description)
+  • Suivre l'état de ses commandes
+
+🛡️ Administrateur (ROLE_ADMIN)
+──────────────────────────────
+  • Accéder à un tableau de bord avec statistiques
+    (CA, utilisateurs, pièces, avis)
+  • Gérer les utilisateurs (changement de rôle, suppression)
+  • Modérer les pièces, commandes et avis
+  • Consulter le détail du chiffre d'affaires par statut
+
+
+════════════════════════════════════════════════════════════════════
+🛠️ 3. STACK TECHNIQUE
+════════════════════════════════════════════════════════════════════
+
+⚙️ Backend
+──────────
+  • PHP 8.2
+  • Symfony 7.4
+  • API Platform 4.x
+  • Doctrine ORM 3.x (MySQL)
+  • Doctrine ODM 2.x (MongoDB)
+  • Lexik JWT 3.x
+  • Nelmio CORS 2.x
+  • MySQL 8.4 (Aiven)
+  • MongoDB Atlas (Cloud)
+
+🎨 Frontend
+───────────
+  • React 18
+  • Vite 5.x
+  • React Router 6.x
+  • Axios 1.x
+  • Tailwind CSS 4.x
+
+🧰 Outils
+─────────
+  • Git + GitHub (versioning)
+  • Docker (conteneurisation backend)
+  • Postman (tests API)
+  • PHPUnit (tests unitaires)
+  • MongoDB Compass (exploration NoSQL)
+  • Figma (maquettes)
+
+
+════════════════════════════════════════════════════════════════════
+🏗️ 4. ARCHITECTURE
+════════════════════════════════════════════════════════════════════
+
+          👤 UTILISATEUR (Navigateur Web)
+                      │
+                      │ HTTPS
+                      ▼
+          ⚡ VERCEL — Frontend React
+                      │
+                      │ API REST (HTTPS + JWT)
+                      ▼
+          🐘 RENDER — Backend Symfony (Docker)
+                      │
+                ┌─────┴─────┐
+                ▼           ▼
+         🗄️ MySQL       🍃 MongoDB
+          (Aiven)        (Atlas)
+
+💡 Principe : frontend et backend sont découplés et communiquent
+   uniquement via une API REST sécurisée par JWT.
+
+
+════════════════════════════════════════════════════════════════════
+🚀 5. INSTALLATION LOCALE
+════════════════════════════════════════════════════════════════════
+
+📋 Prérequis
+────────────
+  • PHP 8.2+
+  • Composer 2.x
+  • Node.js 20+ et npm
+  • MySQL 8 (XAMPP, MAMP, etc.)
+  • MongoDB Atlas (compte gratuit)
+  • Extension PHP mongodb activée
+
+🔧 Étapes
+─────────
+
+  1️⃣  Cloner le dépôt
+      git clone https://github.com/MacFly-99/Car-Palace.git
+      cd Car-Palace
+
+  2️⃣  Installer les dépendances backend
+      composer install
+
+  3️⃣  Créer le fichier .env.local avec vos secrets
+      MONGODB_URI=mongodb+srv://...
+      JWT_PASSPHRASE=votre_passphrase
+
+  4️⃣  Créer la base de données MySQL
+      php bin/console doctrine:database:create
+
+  5️⃣  Lancer les migrations
+      php bin/console doctrine:migrations:migrate
+
+  6️⃣  Charger les données de test
+      php bin/console doctrine:fixtures:load
+
+  7️⃣  Générer les clés JWT
+      php bin/console lexik:jwt:generate-keypair
+
+  8️⃣  Lancer le serveur Symfony
+      symfony server:start --no-tls
+
+  9️⃣  Dans un autre terminal, installer et lancer le frontend
+      cd frontend
+      npm install
+      npm run dev
+
+🌐 Accès
+────────
+  • Frontend   : http://localhost:5173
+  • Backend API: http://localhost:8000/api
+
+🔑 Comptes de test
+──────────────────
+  • 👑 Administrateur : admin@car-palace.fr / password123
+  • 👤 Utilisateur    : user_test@car-palace.fr / password123
+
+
+════════════════════════════════════════════════════════════════════
+🌐 6. DÉPLOIEMENT
+════════════════════════════════════════════════════════════════════
+
+📦 Composants en production
+───────────────────────────
+  • 🎨 Frontend   : Vercel
+       https://car-palace-frontend.vercel.app
+
+  • 🐘 Backend    : Render
+       https://car-palace-api.onrender.com
+
+  • 🗄️ Base SQL   : Aiven (MySQL 8.4.11, cloud, SSL obligatoire)
+
+  • 🍃 Base NoSQL : MongoDB Atlas (cloud)
+
+⚙️ Procédure simplifiée
+───────────────────────
+  1. Backend déployé via un Dockerfile sur Render
+     (conteneur PHP 8.2 + Apache + extensions MongoDB).
+
+  2. Frontend déployé automatiquement sur Vercel à chaque
+     git push sur la branche main.
+
+  3. Base SQL provisionnée sur Aiven avec SSL obligatoire.
+
+  4. Sécurité : SSL MySQL, JWT 4h, rate limiting, security headers.
+
+
+════════════════════════════════════════════════════════════════════
+🧪 7. TESTS
+════════════════════════════════════════════════════════════════════
+
+🔬 Tests unitaires (PHPUnit)
+────────────────────────────
+  • Commande : php bin/phpunit
+  • Résultat attendu : OK (16 tests, 24 assertions)
+
+📮 Tests d'intégration (Postman)
+────────────────────────────────
+  Une collection Postman complète couvre :
+
+  • Authentification (login admin + user)
+  • CRUD complet sur les pièces
+  • Routes admin (stats, gestion utilisateurs, pièces,
+    commandes, avis)
+  • Tests de sécurité (401, 403, 429)
+  • Messagerie MongoDB
+
+
+════════════════════════════════════════════════════════════════════
+🔒 8. SÉCURITÉ
+════════════════════════════════════════════════════════════════════
+
+🛡️ Mesures en place
+────────────────────
+  • Authentification JWT (Lexik) avec durée de vie réduite à 4h
+    en production.
+
+  • Rate limiting sur login et inscription (5 tentatives / 15 min).
+
+  • Hachage des mots de passe avec Bcrypt.
+
+  • Contrôle d'accès par rôles (ROLE_USER / ROLE_ADMIN)
+    côté serveur via #[IsGranted] et côté client via AdminRoute.
+
+  • Vérification du propriétaire : un utilisateur ne peut modifier
+    que ses propres ressources.
+
+  • Connexion MySQL SSL (certificat CA Aiven).
+
+  • Security Headers : CSP, X-Frame-Options, X-Content-Type-Options,
+    Referrer-Policy, Permissions-Policy.
+
+  • CORS strict : seules les URLs de production sont autorisées.
+
+  • Versions Apache/PHP masquées.
+
+  • Secrets isolés : fichiers .env.local et config/jwt/*.pem
+    exclus du dépôt Git.
+
+
+════════════════════════════════════════════════════════════════════
+📁 9. STRUCTURE DU PROJET
+════════════════════════════════════════════════════════════════════
+
+Car-Palace/
+├── config/
+│   ├── jwt/                   🔑 Clés RSA pour JWT
+│   ├── packages/              ⚙️ Configuration par bundle
+│   └── routes.yaml
+├── docker/
+│   ├── entrypoint.sh          🐳 Script de démarrage
+│   └── vhost.conf             ⚙️ Config Apache
+├── frontend/
+│   ├── public/
+│   └── src/
+│       ├── assets/
+│       ├── components/        🧩 Composants réutilisables
+│       ├── context/           🔄 Contextes React
+│       ├── pages/
+│       │   ├── admin/         🛡️ Espace administrateur
+│       │   ├── auth/          🔐 Login, Register
+│       │   ├── pieces/        🔧 Catalogue, Détail, Vendre, Modifier
+│       │   └── users/         👤 MesPieces, MesMessages, Messagerie
+│       └── services/          📡 Appels API
+├── migrations/                🗄️ Migrations Doctrine
+├── public/                    🌐 Point d'entrée web
+├── src/
+│   ├── Controller/            🎮 Contrôleurs
+│   ├── DataFixtures/          🌱 Jeux de données de test
+│   ├── Document/              🍃 Documents MongoDB
+│   ├── Entity/                📦 Entités Doctrine
+│   └── Repository/
+├── tests/                     🧪 Tests PHPUnit
+├── Dockerfile                 🐳 Conteneur Backend
+├── composer.json
+├── package.json
+├── render.yaml                ⚙️ IaC Render
+└── README.md
+
+
+════════════════════════════════════════════════════════════════════
+👤 10. AUTEUR
+════════════════════════════════════════════════════════════════════
+
+  🎓 Matteo Ventura
+
+  • Titre Professionnel DWWM — Session 2026
+  • École : CEF
+  • 🐙 GitHub : https://github.com/MacFly-99
+  • 🌐 Application : https://car-palace-frontend.vercel.app
+
+
+════════════════════════════════════════════════════════════════════
+📄 LICENCE
+════════════════════════════════════════════════════════════════════
+
+Projet réalisé dans le cadre d'une formation.
+Usage pédagogique uniquement.
+
+
+════════════════════════════════════════════════════════════════════
+💡 Développé avec passion pour le Titre Professionnel DWWM
+════════════════════════════════════════════════════════════════════
