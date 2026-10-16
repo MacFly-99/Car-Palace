@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import messageService from '../services/messageService';
 import logoIcon from '../assets/logo-icon.png';
+import { useCart } from '../context/CartContext';
+
 
 function Header() {
   const { user, logout } = useAuth();
@@ -10,6 +12,7 @@ function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
+  const { cartCount } = useCart();
 
   // Charger le nombre de messages non lus
   useEffect(() => {
@@ -119,6 +122,15 @@ function Header() {
             <>
               <Link to="/mes-pieces" className="text-white font-semibold hover:text-gray-200 transition-colors">
                 Mes pièces
+              </Link>
+
+              <Link to="/panier" className="text-white font-semibold hover:text-gray-200 transition-colors relative">
+                🛒 Panier
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                    {cartCount}
+                  </span>
+                )}
               </Link>
 
               {/* Lien Messages avec badge */}

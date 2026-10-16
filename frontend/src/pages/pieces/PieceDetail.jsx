@@ -5,11 +5,13 @@ import avisService from '../../services/avisService';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { useCart } from '../../context/CartContext';
 
 function PieceDetail() {
   const { id } = useParams();
   const { user } = useAuth();
   const { addToast } = useToast();
+  const { cart, addToCart } = useCart();
 
   const [piece, setPiece] = useState(null);
   const [avis, setAvis] = useState([]);
@@ -21,33 +23,34 @@ function PieceDetail() {
   const [formData, setFormData] = useState({ note: 5, titre: '', description: '' });
   const [submitting, setSubmitting] = useState(false);
 
+  const isInCart = cart.some((item) => item.id === piece?.id);
+
   const fetchData = async () => {
     try {
-        const [pieceData, avisData] = await Promise.all([
-            pieceService.getPieceById(id),
-            avisService.getAvisByPiece(id),
-        ]);
-        setPiece(pieceData);
-        setAvis(Array.isArray(avisData) ? avisData : []);
+      const [pieceData, avisData] = await Promise.all([
+        pieceService.getPieceById(id),
+        avisService.getAvisByPiece(id),
+      ]);
+      setPiece(pieceData);
+      setAvis(Array.isArray(avisData) ? avisData : []);
 
-        // Récupérer les infos du vendeur UNIQUEMENT si connecté
-        if (pieceData.vendeur && user) {
-            const vId = pieceData.vendeur.split('/').pop();
-            setVendeurId(vId);
-            try {
-                const response = await api.get(`/utilisateurs/${vId}`);
-                setVendeurEmail(response.data.email);
-            } catch (err) {
-                // Silencieux
-            }
+      if (pieceData.vendeur && user) {
+        const vId = pieceData.vendeur.split('/').pop();
+        setVendeurId(vId);
+        try {
+          const response = await api.get(`/utilisateurs/${vId}`);
+          setVendeurEmail(response.data.email);
+        } catch (err) {
+          // Silencieux
         }
-        setLoading(false);
-      } catch (err) {
-        console.error(err);
-        setError("Impossible de charger cette pièce.");
-        setLoading(false);
       }
-    };
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setError("Impossible de charger cette pièce.");
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchData();
@@ -134,24 +137,44 @@ function PieceDetail() {
               </div>
             </div>
 
+            {/* Bouton Ajouter au panier */}
+            <button
+              onClick={() => {
+                addToCart({
+                  id: piece.id,
+                  titre: piece.titre,
+                  prix: piece.prix,
+                });
+                addToast('Pièce ajoutée au panier !', 'success');
+              }}
+              disabled={isInCart}
+              className={`mt-4 font-bold py-3 px-6 rounded-lg transition-colors ${
+                isInCart
+                  ? 'bg-green-600 text-white cursor-not-allowed opacity-90'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }`}
+            >
+              {isInCart ? '✓ Déjà dans le panier' : '🛒 Ajouter au panier'}
+            </button>
+
             {/* Bouton contacter le vendeur */}
             {canContact && (
               <Link
                 to={`/messages/${vendeurId}?piece=${piece.id}`}
-                className="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+                className="ml-4 inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
               >
                 💬 Contacter le vendeur
               </Link>
             )}
 
             {!user && (
-              <p className="text-sm text-gray-500 italic">
+              <p className="text-sm text-gray-500 italic mt-4">
                 <Link to="/login" className="text-blue-600 underline">Connecte-toi</Link> pour contacter le vendeur.
               </p>
             )}
 
             {isVendeur && (
-              <p className="text-sm text-gray-500 italic">
+              <p className="text-sm text-gray-500 italic mt-4">
                 C'est ta propre annonce.
               </p>
             )}

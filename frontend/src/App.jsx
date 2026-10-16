@@ -30,6 +30,7 @@ import MesPieces from './pages/users/MesPieces';
 import ModifierPiece from './pages/pieces/ModifierPiece';
 import Messagerie from './pages/users/Messagerie';
 import MesMessages from './pages/users/MesMessages';
+import Panier from './pages/users/Panier';
 
 // ==============================================
 // IMPORTS PAGES - ESPACE ADMIN
@@ -68,6 +69,7 @@ function App() {
         <Route path="/pieces/:id/modifier" element={<ModifierPiece />} />
         <Route path="/messages/:userId" element={<Messagerie />} />
         <Route path="/mes-messages" element={<MesMessages />} />
+        <Route path="/panier" element={<Panier />} />
 
         {/* ============================================== */}
         {/* ESPACE ADMIN (nécessite ROLE_ADMIN) */}
