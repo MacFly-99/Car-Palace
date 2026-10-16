@@ -63,9 +63,10 @@ function AdminAvis() {
         <h1 className="text-3xl font-bold text-gray-800 mb-8">
           Gestion des avis ({avis.length})
         </h1>
-
+        
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
-          <table className="w-full">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[700px]">
             <thead className="bg-gray-100">
               <tr>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">ID</th>
@@ -97,7 +98,8 @@ function AdminAvis() {
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
       </div>
 
