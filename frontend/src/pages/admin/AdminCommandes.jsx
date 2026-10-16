@@ -46,14 +46,15 @@ function AdminCommandes() {
         </h1>
 
         {/* Résumé */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-md p-6 mb-8 text-white">
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-md p-4 sm:p-6 mb-8 text-white">
           <p className="text-sm opacity-80 mb-1">Chiffre d'affaires total</p>
-          <p className="text-4xl font-bold">{chiffreAffaires.toFixed(2)} €</p>
+          <p className="text-2xl sm:text-4xl font-bold">{chiffreAffaires.toFixed(2)} €</p>
         </div>
 
         {/* Tableau */}
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
-          <table className="w-full">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[700px]">
             <thead className="bg-gray-100">
               <tr>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">ID</th>
@@ -96,7 +97,8 @@ function AdminCommandes() {
                 ))
               )}
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
       </div>
     </div>

@@ -70,12 +70,9 @@ function MesPieces() {
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-5xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-600">Mes annonces</h1>
-          <Link
-            to="/vendre"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-          >
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-blue-600">Mes annonces</h1>
+          <Link to="/vendre" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-center">
             + Nouvelle annonce
           </Link>
         </div>
@@ -90,11 +87,11 @@ function MesPieces() {
         ) : (
           <div className="space-y-4">
             {pieces.map((piece) => (
-              <div key={piece.id} className="bg-white p-6 rounded-xl shadow-md flex justify-between items-center">
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold text-gray-800">{piece.titre}</h2>
+              <div key={piece.id} className="bg-white p-4 sm:p-6 rounded-xl shadow-md flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-lg sm:text-xl font-bold text-gray-800 break-words">{piece.titre}</h2>
                   <p className="text-gray-600 text-sm mb-2 line-clamp-1">{piece.description}</p>
-                  <div className="flex gap-4 text-sm text-gray-500">
+                  <div className="flex flex-wrap gap-2 text-sm text-gray-500">
                     <span>💰 {piece.prix} €</span>
                     <span>🏷️ {piece.marque}</span>
                     <span>📁 {piece.categorie}</span>
@@ -102,22 +99,22 @@ function MesPieces() {
                   </div>
                 </div>
 
-                <div className="flex gap-2 ml-4">
+                <div className="flex flex-wrap gap-2 sm:ml-4">
                   <Link
-                  to={`/pieces/${piece.id}`}
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg transition-colors"
+                    to={`/pieces/${piece.id}`}
+                    className="flex-1 sm:flex-none text-center bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg transition-colors"
                   >
                     Voir
                   </Link>
                   <Link
-                  to={`/pieces/${piece.id}/modifier`}
-                  className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                    to={`/pieces/${piece.id}/modifier`}
+                    className="flex-1 sm:flex-none text-center bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
                   >
                     Modifier
                   </Link>
                   <button
-                  onClick={() => requestDelete(piece)}
-                  className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                    onClick={() => requestDelete(piece)}
+                    className="flex-1 sm:flex-none text-center bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
                   >
                     Supprimer
                   </button>
