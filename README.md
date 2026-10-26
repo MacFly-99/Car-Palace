@@ -2,6 +2,8 @@
 
 > Plateforme d'achat et de revente de pièces détachées automobiles entre particuliers.
 
+## 🌐 Application : [car-palace-frontend.vercel.app](https://car-palace-frontend.vercel.app)
+
 ---
 
 ## 📋 Sommaire
@@ -299,7 +301,6 @@ Une collection Postman complète est disponible avec 20 tests couvrant :
 
 - Année 2026
 - 🐙 GitHub : [@MacFly-99](https://github.com/MacFly-99)
-- 🌐 Application : [car-palace-frontend.vercel.app](https://car-palace-frontend.vercel.app)
 
 ---
 
