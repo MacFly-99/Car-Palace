@@ -2,8 +2,6 @@
 
 > Plateforme d'achat et de revente de pièces détachées automobiles entre particuliers.
 
-**🎓 Projet de fin de formation DWWM — Session 2026**
-
 ---
 
 ## 📋 Sommaire
@@ -25,7 +23,7 @@
 
 Car Palace est une plateforme web permettant l'achat et la revente de pièces détachées automobiles entre particuliers.
 
-Elle a été développée dans le cadre du Titre Professionnel **Développeur Web et Web Mobile (DWWM)** avec pour objectifs :
+Elle a été développée minutieusement avec pour objectifs :
 
 - ✅ Mettre en œuvre une **architecture full-stack découplée** (API REST + SPA).
 - ✅ Démontrer la maîtrise conjointe de **bases de données SQL et NoSQL**.
@@ -299,8 +297,7 @@ Une collection Postman complète est disponible avec 20 tests couvrant :
 
 **🎓 Matteo Ventura**
 
-- Titre Professionnel DWWM — Session 2026
-- École : CEF
+- Année 2026
 - 🐙 GitHub : [@MacFly-99](https://github.com/MacFly-99)
 - 🌐 Application : [car-palace-frontend.vercel.app](https://car-palace-frontend.vercel.app)
 
@@ -308,4 +305,4 @@ Une collection Postman complète est disponible avec 20 tests couvrant :
 
 ## 📄 Licence
 
-Projet réalisé dans le cadre d'une formation. Usage pédagogique uniquement.
+Projet propriétaire. Usage pédagogique uniquement.
